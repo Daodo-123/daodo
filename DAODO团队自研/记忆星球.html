@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>记忆星球 · Daodo</title>
+
+    <!-- ===== 方案 B Favicon（带深色背景） ===== -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect x='0' y='0' width='200' height='200' rx='40' fill='%23080c16'/%3E%3Cpath d='M 34 68 L 12 100 L 34 132' fill='none' stroke='%2366aaff' stroke-width='10' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ctext x='100' y='145' font-family='system-ui, sans-serif' font-size='110' font-weight='700' fill='%2366aaff' text-anchor='middle' letter-spacing='-4'%3ED%3C/text%3E%3Cpath d='M 166 68 L 188 100 L 166 132' fill='none' stroke='%2366aaff' stroke-width='10' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js">
+    </script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #06080e;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            color: #e8edf5;
+        }
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        /* 顶栏 */
+        .header {
+            position: fixed;
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(28px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 60px;
+            padding: 8px 20px;
+            min-width: 280px;
+            max-width: 92%;
+            flex-wrap: wrap;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+        }
+        .header .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            font-size: 17px;
+        }
+        .header .logo svg {
+            width: 28px;
+            height: 28px;
+        }
+        .header .search-area {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex: 1;
+            min-width: 100px;
+        }
+        .header .search-area input {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 40px;
+            padding: 5px 14px;
+            color: #e8edf5;
+            font-size: 12px;
+            outline: none;
+            width: 100%;
+            transition: 0.3s;
+        }
+        .header .search-area input:focus {
+            border-color: rgba(100, 180, 255, 0.25);
+            background: rgba(255, 255, 255, 0.06);
+        }
+        .header .search-area input::placeholder {
+            color: rgba(255, 255, 255, 0.15);
+        }
+        .header .search-area .btn {
+            padding: 5px 16px;
+            border-radius: 40px;
+            border: none;
+            font-weight: 600;
+            font-size: 11px;
+            cursor: pointer;
+            background: linear-gradient(135deg, #64b5f6, #7c4dff);
+            color: #fff;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+        .header .search-area .btn:hover {
+            transform: scale(1.04);
+            box-shadow: 0 4px 20px rgba(100, 180, 255, 0.2);
+        }
+        .header .badge-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.25);
+        }
+        .header .badge-group .stat {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .header .badge-group .stat .num {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        /* 底部控制栏 */
+        .bottom-bar {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 60px;
+            padding: 8px 18px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .bottom-bar .action-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 40px;
+            padding: 5px 14px;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-family: inherit;
+        }
+        .bottom-bar .action-btn:hover {
+            background: rgba(255, 255, 255, 0.06);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+        .bottom-bar .action-btn.primary {
+            background: rgba(100, 180, 255, 0.1);
+            border-color: rgba(100, 180, 255, 0.12);
+            color: #64b5f6;
+        }
+        .bottom-bar .action-btn.primary:hover {
+            background: rgba(100, 180, 255, 0.18);
+        }
+
+        /* 颜色指南 */
+        .color-guide-toggle {
+            position: fixed;
+            bottom: 85px;
+            right: 24px;
+            z-index: 25;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 40px;
+            padding: 8px 16px;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .color-guide-toggle:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+        }
+        .color-guide-toggle .dot-group {
+            display: flex;
+            gap: 3px;
+        }
+        .color-guide-toggle .dot-group span {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .color-guide-panel {
+            position: fixed;
+            bottom: 130px;
+            right: 24px;
+            z-index: 25;
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(32px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
+            padding: 18px 22px;
+            min-width: 180px;
+            opacity: 0;
+            transform: translateY(10px) scale(0.96);
+            pointer-events: none;
+            transition: all 0.35s cubic-bezier(0.23, 1, 0.32, 1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        }
+        .color-guide-panel.open {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
+        .color-guide-panel .title {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.15);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        .color-guide-panel .item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 4px 0;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.4);
+        }
+        .color-guide-panel .item .swatch {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        /* 弹窗 */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 30;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(16px);
+            padding: 20px;
+        }
+        .modal-overlay.open {
+            display: flex;
+        }
+        .modal-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(40px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 28px;
+            padding: 32px 36px;
+            max-width: 460px;
+            width: 100%;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
+            animation: fadeUp 0.35s ease;
+            position: relative;
+        }
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(25px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        .modal-card .close-btn {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            font-size: 22px;
+            color: rgba(255, 255, 255, 0.12);
+            cursor: pointer;
+            background: none;
+            border: none;
+            transition: 0.2s;
+        }
+        .modal-card .close-btn:hover {
+            color: #fff;
+            transform: rotate(90deg);
+        }
+        .modal-card h3 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            letter-spacing: -0.5px;
+        }
+        .modal-card label {
+            display: block;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.2);
+            margin-bottom: 4px;
+            margin-top: 12px;
+        }
+        .modal-card textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            background: rgba(255, 255, 255, 0.03);
+            color: #e8edf5;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 80px;
+            font-family: inherit;
+            outline: none;
+            transition: 0.3s;
+        }
+        .modal-card textarea:focus {
+            border-color: rgba(100, 180, 255, 0.15);
+            background: rgba(255, 255, 255, 0.04);
+        }
+        .modal-card input {
+            width: 100%;
+            padding: 8px 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            background: rgba(255, 255, 255, 0.03);
+            color: #e8edf5;
+            font-size: 14px;
+            outline: none;
+            font-family: inherit;
+        }
+        .modal-card input:focus {
+            border-color: rgba(100, 180, 255, 0.15);
+            background: rgba(255, 255, 255, 0.04);
+        }
+        .modal-card .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: flex-end;
+        }
+        .modal-card .modal-actions .btn-confirm {
+            padding: 8px 24px;
+            border-radius: 40px;
+            border: none;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            background: linear-gradient(135deg, #64b5f6, #7c4dff);
+            color: #fff;
+            transition: 0.2s;
+        }
+        .modal-card .modal-actions .btn-confirm:hover {
+            transform: scale(1.04);
+            box-shadow: 0 4px 24px rgba(100, 180, 255, 0.2);
+        }
+        .modal-card .modal-actions .btn-cancel {
+            padding: 8px 20px;
+            border-radius: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            background: transparent;
+            color: rgba(255, 255, 255, 0.2);
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+        .modal-card .modal-actions .btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.04);
+            color: #fff;
+        }
+
+        .detail-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 30;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(16px);
+            padding: 20px;
+        }
+        .detail-overlay.open {
+            display: flex;
+        }
+        .detail-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(40px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 28px;
+            padding: 32px 36px;
+            max-width: 460px;
+            width: 100%;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
+            animation: fadeUp 0.35s ease;
+            position: relative;
+        }
+        .detail-card .close-btn {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            font-size: 22px;
+            color: rgba(255, 255, 255, 0.12);
+            cursor: pointer;
+            background: none;
+            border: none;
+            transition: 0.2s;
+        }
+        .detail-card .close-btn:hover {
+            color: #fff;
+            transform: rotate(90deg);
+        }
+        .detail-card .time {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.2);
+            margin-bottom: 4px;
+        }
+        .detail-card .content {
+            font-size: 18px;
+            line-height: 1.7;
+            color: #f0f4fa;
+            margin-bottom: 10px;
+        }
+        .detail-card .tags {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .detail-card .tags span {
+            font-size: 11px;
+            padding: 2px 14px;
+            border-radius: 40px;
+            background: rgba(100, 180, 255, 0.06);
+            border: 1px solid rgba(100, 180, 255, 0.04);
+            color: rgba(255, 255, 255, 0.3);
+        }
+        .detail-card .actions {
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px solid rgba(255, 255, 255, 0.03);
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .detail-card .actions button {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 40px;
+            padding: 5px 14px;
+            color: rgba(255, 255, 255, 0.25);
+            font-size: 11px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .detail-card .actions button:hover {
+            background: rgba(255, 255, 255, 0.04);
+            color: #fff;
+        }
+        .detail-card .actions button.danger {
+            color: #f472b6;
+            border-color: rgba(244, 114, 182, 0.04);
+        }
+        .detail-card .actions button.danger:hover {
+            background: rgba(244, 114, 182, 0.04);
+        }
+        .detail-card .from {
+            margin-top: 10px;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.08);
+        }
+
+        .toast-msg {
+            position: fixed;
+            bottom: 85px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 15;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(32px);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 12px 24px;
+            max-width: 460px;
+            width: 90%;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            transform: translateX(-50%) translateY(25px);
+            pointer-events: none;
+        }
+        .toast-msg.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+            pointer-events: auto;
+        }
+        .toast-msg .label {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.1);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+        .toast-msg .content {
+            font-size: 15px;
+            margin-top: 2px;
+            color: #e8edf5;
+        }
+
+        @media (max-width: 640px) {
+            .header {
+                padding: 6px 12px;
+                min-width: unset;
+                width: calc(100% - 12px);
+                top: 10px;
+                border-radius: 40px;
+            }
+            .header .logo {
+                font-size: 14px;
+            }
+            .header .logo svg {
+                width: 24px;
+                height: 24px;
+            }
+            .header .search-area input {
+                font-size: 10px;
+                padding: 4px 10px;
+            }
+            .header .search-area .btn {
+                font-size: 10px;
+                padding: 4px 10px;
+            }
+            .header .badge-group {
+                font-size: 10px;
+                gap: 6px;
+            }
+            .bottom-bar {
+                padding: 6px 12px;
+                bottom: 12px;
+                gap: 4px;
+                border-radius: 40px;
+                width: calc(100% - 12px);
+            }
+            .bottom-bar .action-btn {
+                font-size: 9px;
+                padding: 4px 10px;
+            }
+            .color-guide-toggle {
+                bottom: 75px;
+                right: 14px;
+                font-size: 10px;
+                padding: 5px 12px;
+            }
+            .color-guide-panel {
+                bottom: 115px;
+                right: 14px;
+                min-width: 150px;
+                padding: 14px 16px;
+            }
+            .modal-card {
+                padding: 20px 18px;
+                margin: 10px;
+            }
+            .modal-card h3 {
+                font-size: 17px;
+            }
+            .detail-card {
+                padding: 20px 18px;
+                margin: 10px;
+            }
+            .detail-card .content {
+                font-size: 16px;
+            }
+            .toast-msg {
+                bottom: 70px;
+                padding: 10px 16px;
+            }
+            .toast-msg .content {
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="canvas-container"></div>
+
+    <!-- ===== 顶栏（Logo 已换成方案 B） ===== -->
+    <div class="header">
+        <div class="logo">
+            <svg viewBox="0 0 200 200" width="28" height="28">
+                <defs>
+                    <linearGradient id="gb" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#64b5f6" />
+                        <stop offset="100%" stop-color="#7c4dff" />
+                    </linearGradient>
+                </defs>
+                <rect x="0" y="0" width="200" height="200" rx="40" fill="#080c16" />
+                <rect x="10" y="10" width="180" height="180" rx="40" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.03)" stroke-width="2" />
+                <path d="M 44 68 L 26 100 L 44 132" fill="none" stroke="#64b5f6" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.5" />
+                <path d="M 156 68 L 174 100 L 156 132" fill="none" stroke="#64b5f6" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.5" />
+                <circle cx="100" cy="100" r="46" fill="none" stroke="url(#gb)" stroke-width="1.5" opacity="0.12" />
+                <circle cx="100" cy="100" r="38" fill="none" stroke="url(#gb)" stroke-width="2.5" opacity="0.35" />
+                <circle cx="100" cy="100" r="28" fill="url(#gb)" opacity="0.06" />
+                <circle cx="100" cy="100" r="22" fill="none" stroke="url(#gb)" stroke-width="1.5" opacity="0.25" />
+                <circle cx="100" cy="100" r="8" fill="url(#gb)" opacity="0.2" />
+                <path d="M 100 54 A 38 38 0 0 1 136 90 A 38 38 0 0 0 100 62 Z" fill="rgba(255,255,255,0.04)" />
+                <circle cx="174" cy="168" r="5" fill="#7c4dff" opacity="0.3" />
+            </svg>
+            <span>记忆星球</span>
+        </div>
+        <div class="search-area">
+            <input type="text" id="searchInput" placeholder="搜索记忆…" />
+            <button class="btn" id="searchBtn">探索</button>
+        </div>
+        <div class="badge-group">
+            <span class="stat"><i class="fas fa-star" style="color:#64b5f6;font-size:10px;"></i> <span class="num" id="memoryCount">0</span></span>
+        </div>
+    </div>
+
+    <!-- 底部控制栏 -->
+    <div class="bottom-bar">
+        <button class="action-btn primary" id="addMemoryBtn"><i class="fas fa-plus"></i> 添加</button>
+        <button class="action-btn" id="randomBtn"><i class="fas fa-random"></i> 随机</button>
+        <button class="action-btn" id="resetViewBtn"><i class="fas fa-home"></i> 归位</button>
+        <button class="action-btn" id="exportBtn"><i class="fas fa-download"></i> 导出</button>
+        <span style="font-size:10px;color:rgba(255,255,255,0.04);">🪐 拖拽旋转 · 滚轮缩放</span>
+    </div>
+
+    <!-- 颜色指南 -->
+    <button class="color-guide-toggle" id="colorGuideToggle">
+        <span class="dot-group">
+            <span style="background:#FFB74D;"></span>
+            <span style="background:#F06292;"></span>
+            <span style="background:#4FC3F7;"></span>
+            <span style="background:#81C784;"></span>
+            <span style="background:#CE93D8;"></span>
+            <span style="background:#4DD0E1;"></span>
+        </span>
+        🎨 颜色含义
+    </button>
+    <div class="color-guide-panel" id="colorGuidePanel">
+        <div class="title">记忆 → 星球颜色</div>
+        <div class="item"><span class="swatch" style="background:#FFB74D;"></span> 开心 · 快乐 · 温暖</div>
+        <div class="item"><span class="swatch" style="background:#F06292;"></span> 感动 · 老师 · 班主任</div>
+        <div class="item"><span class="swatch" style="background:#4FC3F7;"></span> 奋斗 · 考试 · 努力</div>
+        <div class="item"><span class="swatch" style="background:#81C784;"></span> 成长 · 蜕变 · 长大</div>
+        <div class="item"><span class="swatch" style="background:#CE93D8;"></span> 毕业 · 告别 · 离别</div>
+        <div class="item"><span class="swatch" style="background:#4DD0E1;"></span> 友谊 · 同桌 · 约定</div>
+        <div class="item"><span class="swatch" style="background:#64B5F6;"></span> 其他 · 日常 · 默认</div>
+    </div>
+
+    <!-- 添加弹窗 -->
+    <div class="modal-overlay" id="addModal">
+        <div class="modal-card">
+            <button class="close-btn" id="addModalClose">&times;</button>
+            <h3>🪐 创造记忆星球</h3>
+            <label>记忆内容</label>
+            <textarea id="memoryInput" placeholder="写下一段你想珍藏的记忆…"></textarea>
+            <label>标签（用逗号分隔）</label>
+            <input id="tagInput" placeholder="如：毕业, 感动, 青春" />
+            <div class="modal-actions">
+                <button class="btn-cancel" id="addModalCancel">取消</button>
+                <button class="btn-confirm" id="addModalConfirm">🚀 发射</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 详情弹窗 -->
+    <div class="detail-overlay" id="detailOverlay">
+        <div class="detail-card">
+            <button class="close-btn" id="detailClose">&times;</button>
+            <div class="time" id="detailTime"></div>
+            <div class="content" id="detailContent"></div>
+            <div class="tags" id="detailTags"></div>
+            <div class="actions">
+                <button id="detailDeleteBtn" class="danger"><i class="fas fa-times"></i> 摧毁</button>
+                <button id="detailCopyBtn"><i class="fas fa-copy"></i> 复制</button>
+            </div>
+            <div class="from" id="detailFrom">🪐 记忆星球</div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast-msg" id="toastMsg">
+        <div class="label" id="toastLabel">💡 提示</div>
+        <div class="content" id="toastContent"></div>
+    </div>
+
+    <script>
+        // ================================================================
+        //  📦 数据
+        // ================================================================
+
+        function getEmotionColor(tags, content) {
+            const t = (content + ' ' + (tags || []).join(' ')).toLowerCase();
+            const map = [
+                { k: ['开心', '快乐', '笑', '温暖', '幸福', '幸运', '期待', '高兴'], c: 0xFFB74D },
+                { k: ['感动', '老师', '班主任', '教导', '鼓励', '温柔'], c: 0xF06292 },
+                { k: ['奋斗', '考试', '努力', '冲刺', '复习', '拼搏', '中考', '高考'], c: 0x4FC3F7 },
+                { k: ['成长', '蜕变', '长大', '进步', '改变', '懂事'], c: 0x81C784 },
+                { k: ['毕业', '告别', '离别', '再见', '分别', '各奔东西'], c: 0xCE93D8 },
+                { k: ['友谊', '同桌', '约定', '朋友', '一起', '陪伴'], c: 0x4DD0E1 },
+            ];
+            for (let m of map)
+                for (let kw of m.k)
+                    if (t.includes(kw)) return m.c;
+            return 0x64B5F6;
+        }
+
+        const DEFAULT = [
+            { id: 'm1', content: '今天全班拍了毕业照，阳光特别好，大家笑得都很开心。', tags: ['毕业', '班级', '照片'],
+            time: '2026-06-15T14:30:00' },
+            { id: 'm2', content: '班主任说“你们再看看书，我再看看你们”，全班都沉默了。', tags: ['班主任', '感动', '最后一课'],
+            time: '2026-06-12T16:20:00' },
+            { id: 'm3', content: '和同桌约好了高中还要同班，虽然不知道能不能实现。', tags: ['同桌', '约定', '友谊'],
+            time: '2026-06-10T12:15:00' },
+            { id: 'm4', content: '中考倒计时100天，全班在黑板报上签名，每个人都写了一句话。', tags: ['中考', '倒计时', '签名'],
+            time: '2026-03-05T08:00:00' },
+            { id: 'm5', content: '体育课800米，最后大家手拉手冲过终点线。', tags: ['体育课', '跑步', '团结'],
+            time: '2026-05-20T15:40:00' },
+            { id: 'm6', content: '收到匿名信“谢谢你帮我捡笔”，不知道是谁写的。', tags: ['匿名', '温暖'], time: '2026-04-18T09:10:00' },
+            { id: 'm7', content: '班级投票“最热心同学”，我得了18票。', tags: ['投票', '班级', '荣誉'], time: '2026-05-08T16:00:00' },
+            { id: 'm8', content: '最后一天值日，把教室打扫得很干净。三年了，装了太多回忆。', tags: ['值日', '教室', '告别'],
+            time: '2026-06-18T17:30:00' },
+        ];
+
+        let allMemories = [];
+        let planets = [];
+        let currentDetailId = null;
+
+        function loadData() {
+            try {
+                const s = localStorage.getItem('daodo_planets');
+                if (s) { const p = JSON.parse(s); if (p.length) { allMemories = p; return; } }
+            } catch (e) {}
+            allMemories = JSON.parse(JSON.stringify(DEFAULT));
+            saveData();
+        }
+
+        function saveData() {
+            localStorage.setItem('daodo_planets', JSON.stringify(allMemories));
+            document.getElementById('memoryCount').textContent = allMemories.length;
+        }
+
+        function getMemory(id) { return allMemories.find(m => m.id === id); }
+
+        function addMemory(content, tags) {
+            const m = {
+                id: 'm' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+                content: content.trim(),
+                tags: tags || [],
+                time: new Date().toISOString(),
+            };
+            allMemories.unshift(m);
+            saveData();
+            createPlanet(m, true);
+            showToast('🪐 新星球诞生了', '成功');
+        }
+
+        function deleteMemory(id) {
+            allMemories = allMemories.filter(m => m.id !== id);
+            saveData();
+            const idx = planets.findIndex(p => p.userData.memoryId === id);
+            if (idx > -1) { scene.remove(planets[idx]);
+                planets.splice(idx, 1); }
+            if (currentDetailId === id) {
+                document.getElementById('detailOverlay').classList.remove('open');
+                currentDetailId = null;
+            }
+            showToast('💥 星球已消散', '提示');
+        }
+
+        // ================================================================
+        //  🎨 3D 场景（星球调小，分布拉大）
+        // ================================================================
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x080c16);
+
+        const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+        camera.position.set(0, 0.5, 8);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.0;
+        container.appendChild(renderer.domElement);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.06;
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 0.12;
+        controls.minDistance = 2;
+        controls.maxDistance = 22;
+
+        // ---- 灯光 ----
+        const ambient = new THREE.AmbientLight(0x1a2a4a, 0.6);
+        scene.add(ambient);
+
+        const key = new THREE.DirectionalLight(0x4488ff, 1.2);
+        key.position.set(6, 10, 8);
+        scene.add(key);
+
+        const fill = new THREE.DirectionalLight(0x6644aa, 0.5);
+        fill.position.set(-5, 3, -6);
+        scene.add(fill);
+
+        const rim = new THREE.DirectionalLight(0x88ccff, 0.3);
+        rim.position.set(0, -4, 4);
+        scene.add(rim);
+
+        // ---- 星空 ----
+        const starGeo = new THREE.BufferGeometry();
+        const starPos = new Float32Array(600 * 3);
+        const starSizes = new Float32Array(600);
+        for (let i = 0; i < 600; i++) {
+            starPos[i * 3] = (Math.random() - 0.5) * 80;
+            starPos[i * 3 + 1] = (Math.random() - 0.5) * 80;
+            starPos[i * 3 + 2] = (Math.random() - 0.5) * 80;
+            starSizes[i] = Math.random() * 0.06 + 0.02;
+        }
+        starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+        starGeo.setAttribute('size', new THREE.BufferAttribute(starSizes, 1));
+        const starMat = new THREE.PointsMaterial({
+            color: 0x88bbff,
+            size: 0.05,
+            transparent: true,
+            opacity: 0.25,
+            blending: THREE.AdditiveBlending,
+            sizeAttenuation: true,
+        });
+        const stars = new THREE.Points(starGeo, starMat);
+        scene.add(stars);
+
+        // ================================================================
+        //  🪐 创建星球（调小尺寸）
+        // ================================================================
+        function createPlanet(memory, animateIn) {
+            const total = allMemories.length;
+            // 扩大分布半径
+            const radius = Math.min(6, 2.5 + total * 0.06);
+            const idx = allMemories.findIndex(m => m.id === memory.id);
+            const angle = (idx / total) * Math.PI * 2 + Math.random() * 0.06;
+            const r = radius * (0.65 + Math.random() * 0.35);
+            const targetX = Math.cos(angle) * r;
+            const targetZ = Math.sin(angle) * r;
+            const targetY = (Math.random() - 0.5) * Math.min(2.0, 0.4 + total * 0.015);
+
+            const baseColor = getEmotionColor(memory.tags, memory.content);
+            // 星球更小：0.25 ~ 0.45
+            const size = 0.25 + Math.min(memory.content.length / 200, 0.2);
+
+            const group = new THREE.Group();
+
+            // ---- 内核光晕 ----
+            const coreGeo = new THREE.SphereGeometry(size * 0.95, 24, 24);
+            const coreMat = new THREE.MeshBasicMaterial({
+                color: baseColor,
+                transparent: true,
+                opacity: 0.12,
+                side: THREE.BackSide,
+            });
+            const core = new THREE.Mesh(coreGeo, coreMat);
+            group.add(core);
+
+            // ---- 内部发光点 ----
+            const innerGeo = new THREE.SphereGeometry(size * 0.25, 12, 12);
+            const innerMat = new THREE.MeshBasicMaterial({
+                color: baseColor,
+                transparent: true,
+                opacity: 0.25,
+            });
+            const inner = new THREE.Mesh(innerGeo, innerMat);
+            group.add(inner);
+
+            // ---- 经线 (8条) ----
+            for (let j = 0; j < 8; j++) {
+                const lon = (j / 8) * Math.PI * 2;
+                const pts = [];
+                for (let i = 0; i <= 28; i++) {
+                    const lat = -Math.PI / 2 + (i / 28) * Math.PI;
+                    pts.push(new THREE.Vector3(
+                        size * Math.cos(lat) * Math.cos(lon),
+                        size * Math.sin(lat),
+                        size * Math.cos(lat) * Math.sin(lon)
+                    ));
+                }
+                const geo = new THREE.BufferGeometry().setFromPoints(pts);
+                const mat = new THREE.LineBasicMaterial({
+                    color: baseColor,
+                    transparent: true,
+                    opacity: 0.5,
+                });
+                group.add(new THREE.Line(geo, mat));
+            }
+
+            // ---- 纬线 (5条) ----
+            const lats = [-0.7, -0.35, 0, 0.35, 0.7];
+            lats.forEach(lat => {
+                const pts = [];
+                const r = size * Math.cos(lat);
+                const y = size * Math.sin(lat);
+                for (let i = 0; i <= 28; i++) {
+                    const lon = (i / 28) * Math.PI * 2;
+                    pts.push(new THREE.Vector3(r * Math.cos(lon), y, r * Math.sin(lon)));
+                }
+                const geo = new THREE.BufferGeometry().setFromPoints(pts);
+                const mat = new THREE.LineBasicMaterial({
+                    color: baseColor,
+                    transparent: true,
+                    opacity: 0.25 + (lat === 0 ? 0.15 : 0),
+                });
+                group.add(new THREE.Line(geo, mat));
+            });
+
+            // ---- 光点环 ----
+            const ringCount = 30;
+            const ringR = size * 1.7;
+            const posRing = new Float32Array(ringCount * 3);
+            for (let i = 0; i < ringCount; i++) {
+                const a = (i / ringCount) * Math.PI * 2;
+                posRing[i * 3] = Math.cos(a) * ringR;
+                posRing[i * 3 + 1] = Math.sin(a * 0.2) * 0.05;
+                posRing[i * 3 + 2] = Math.sin(a) * ringR;
+            }
+            const ringGeo = new THREE.BufferGeometry();
+            ringGeo.setAttribute('position', new THREE.BufferAttribute(posRing, 3));
+            const ringMat = new THREE.PointsMaterial({
+                color: baseColor,
+                size: 0.045,
+                transparent: true,
+                opacity: 0.45,
+                blending: THREE.AdditiveBlending,
+                sizeAttenuation: true,
+            });
+            const ring = new THREE.Points(ringGeo, ringMat);
+            ring.rotation.x = Math.PI / 2.8 + Math.random() * 0.2;
+            ring.rotation.z = Math.random() * 0.3;
+            group.add(ring);
+
+            // ---- 第二光环 ----
+            const ring2Geo = new THREE.TorusGeometry(size * 1.9, 0.004, 4, 40);
+            const ring2Mat = new THREE.MeshBasicMaterial({
+                color: baseColor,
+                transparent: true,
+                opacity: 0.1,
+            });
+            const ring2 = new THREE.Mesh(ring2Geo, ring2Mat);
+            ring2.rotation.x = Math.PI / 2.4 + Math.random() * 0.3;
+            ring2.rotation.z = -Math.random() * 0.3;
+            group.add(ring2);
+
+            // ---- 流动光点 ----
+            const flowGeo = new THREE.BufferGeometry();
+            const flowPos = new Float32Array([0, 0, 0]);
+            flowGeo.setAttribute('position', new THREE.BufferAttribute(flowPos, 3));
+            const flowMat = new THREE.PointsMaterial({
+                color: 0x88ddff,
+                size: 0.06,
+                transparent: true,
+                opacity: 0.9,
+                blending: THREE.AdditiveBlending,
+                sizeAttenuation: true,
+            });
+            const flow = new THREE.Points(flowGeo, flowMat);
+            group.add(flow);
+
+            group.position.set(animateIn ? 0 : targetX, animateIn ? 0 : targetY, animateIn ? 0 : targetZ);
+
+            group.userData = {
+                memoryId: memory.id,
+                baseY: targetY,
+                targetX: targetX,
+                targetZ: targetZ,
+                phase: Math.random() * Math.PI * 2,
+                floatSpeed: 0.08 + Math.random() * 0.08,
+                floatAmp: 0.03 + Math.random() * 0.03,
+                rotSpeed: 0.06 + Math.random() * 0.1,
+                core: core,
+                inner: inner,
+                ring: ring,
+                ring2: ring2,
+                flow: flow,
+                flowAngle: Math.random() * Math.PI * 2,
+                baseColor: baseColor,
+                size: size,
+            };
+
+            scene.add(group);
+            planets.push(group);
+
+            // 入场动画
+            if (animateIn) {
+                const startTime = Date.now();
+                const duration = 600 + Math.random() * 300;
+
+                function flyIn() {
+                    const el = Date.now() - startTime;
+                    const t = Math.min(el / duration, 1);
+                    const ease = 1 - Math.pow(1 - t, 3);
+                    group.position.set(targetX * ease, targetY * ease, targetZ * ease);
+                    if (t < 1) requestAnimationFrame(flyIn);
+                }
+                flyIn();
+            }
+
+            document.getElementById('memoryCount').textContent = allMemories.length;
+            return group;
+        }
+
+        function rebuildScene() {
+            planets.forEach(p => scene.remove(p));
+            planets = [];
+            if (!allMemories.length) { showToast('🪐 宇宙空着，创造一颗星球吧', '提示'); return; }
+            allMemories.forEach(m => createPlanet(m, false));
+            document.getElementById('memoryCount').textContent = allMemories.length;
+            console.log('✅ 已创建', planets.length, '颗星球');
+        }
+
+        // ================================================================
+        //  🎯 交互
+        // ================================================================
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        renderer.domElement.addEventListener('click', (e) => {
+            const rect = renderer.domElement.getBoundingClientRect();
+            mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const meshes = [];
+            planets.forEach(g => g.children.forEach(c => { if (c.isMesh) { c.userData.parent = g;
+                    meshes.push(c); } }));
+            const hits = raycaster.intersectObjects(meshes);
+            if (hits.length) {
+                const g = hits[0].object.userData.parent;
+                if (g && g.userData.memoryId) {
+                    const m = getMemory(g.userData.memoryId);
+                    if (m) {
+                        showDetail(m);
+                        g.scale.set(1.3, 1.3, 1.3);
+                        setTimeout(() => g.scale.set(1, 1, 1), 300);
+                    }
+                    controls.autoRotate = false;
+                    setTimeout(() => controls.autoRotate = true, 3000);
+                }
+            }
+        });
+
+        renderer.domElement.addEventListener('mousemove', (e) => {
+            const rect = renderer.domElement.getBoundingClientRect();
+            mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+            const meshes = [];
+            planets.forEach(g => g.children.forEach(c => { if (c.isMesh) { c.userData.parent = g;
+                    meshes.push(c); } }));
+            const hits = raycaster.intersectObjects(meshes);
+            renderer.domElement.style.cursor = hits.length ? 'pointer' : 'default';
+
+            planets.forEach(g => {
+                const isHover = hits.some(h => h.object.userData.parent === g);
+                const s = isHover ? 1.15 : 1;
+                g.scale.lerp(new THREE.Vector3(s, s, s), 0.08);
+                if (g.userData.core) {
+                    const targetOpacity = isHover ? 0.2 : 0.12;
+                    g.userData.core.material.opacity += (targetOpacity - g.userData.core.material
+                    .opacity) * 0.05;
+                }
+            });
+        });
+
+        // ================================================================
+        //  📋 UI
+        // ================================================================
+        function showDetail(m) {
+            currentDetailId = m.id;
+            const o = document.getElementById('detailOverlay');
+            document.getElementById('detailTime').textContent = new Date(m.time).toLocaleString('zh-CN');
+            document.getElementById('detailContent').textContent = m.content;
+            document.getElementById('detailFrom').textContent = '🪐 记忆星球';
+            document.getElementById('detailTags').innerHTML = (m.tags || []).map(t => `<span>#${t}</span>`).join('');
+            o.classList.add('open');
+        }
+
+        document.getElementById('detailClose').onclick = () => document.getElementById('detailOverlay').classList.remove(
+        'open');
+        document.getElementById('detailOverlay').onclick = (e) => { if (e.target === e.currentTarget) document.getElementById(
+                'detailOverlay').classList.remove('open'); };
+        document.getElementById('detailDeleteBtn').onclick = () => { if (currentDetailId && confirm('摧毁这颗星球？'))
+                deleteMemory(currentDetailId); };
+        document.getElementById('detailCopyBtn').onclick = () => {
+            const c = document.getElementById('detailContent').textContent;
+            navigator.clipboard.writeText(`🪐 来自记忆星球：\n"${c}"`).then(() => showToast('📋 已复制', '成功'));
+        };
+
+        // ================================================================
+        //  🎮 控制器
+        // ================================================================
+        document.getElementById('addMemoryBtn').onclick = () => {
+            document.getElementById('addModal').classList.add('open');
+            document.getElementById('memoryInput').value = '';
+            document.getElementById('tagInput').value = '';
+            setTimeout(() => document.getElementById('memoryInput').focus(), 100);
+        };
+        document.getElementById('addModalClose').onclick = () => document.getElementById('addModal').classList.remove('open');
+        document.getElementById('addModalCancel').onclick = () => document.getElementById('addModal').classList.remove('open');
+        document.getElementById('addModal').onclick = (e) => { if (e.target === e.currentTarget) document.getElementById(
+                'addModal').classList.remove('open'); };
+        document.getElementById('addModalConfirm').onclick = () => {
+            const c = document.getElementById('memoryInput').value.trim();
+            const t = document.getElementById('tagInput').value.trim();
+            if (!c) { showToast('⚠️ 写点什么吧', '提示'); return; }
+            addMemory(c, t ? t.split(',').map(s => s.trim()).filter(Boolean) : []);
+            document.getElementById('addModal').classList.remove('open');
+        };
+        document.getElementById('memoryInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault();
+                document.getElementById('addModalConfirm').click(); }
+        });
+
+        document.getElementById('randomBtn').onclick = () => {
+            if (!planets.length) return;
+            const p = planets[Math.floor(Math.random() * planets.length)];
+            const m = getMemory(p.userData.memoryId);
+            if (m) showDetail(m);
+        };
+
+        document.getElementById('resetViewBtn').onclick = () => {
+            controls.autoRotate = true;
+            controls.target.set(0, 0, 0);
+            const start = camera.position.clone();
+            const end = new THREE.Vector3(0, 0.5, 8);
+            const t0 = Date.now();
+
+            function animCam() {
+                const el = Date.now() - t0;
+                const t = Math.min(el / 800, 1);
+                const e = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+                camera.position.lerpVectors(start, end, e);
+                controls.update();
+                if (t < 1) requestAnimationFrame(animCam);
+            }
+            animCam();
+            showToast('🏠 回到宇宙中心', '提示');
+        };
+
+        document.getElementById('exportBtn').onclick = () => {
+            const blob = new Blob([JSON.stringify(allMemories, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `daodo_planets_${new Date().toISOString().slice(0, 10)}.json`;
+            a.click();
+            showToast('📦 宇宙数据已导出', '成功');
+        };
+
+        document.getElementById('searchBtn').onclick = search;
+        document.getElementById('searchInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') search(); });
+
+        function search() {
+            const q = document.getElementById('searchInput').value.trim().toLowerCase();
+            let count = 0;
+            planets.forEach(p => {
+                const m = getMemory(p.userData.memoryId);
+                if (!m) return;
+                const match = m.content.includes(q) || (m.tags || []).some(t => t.includes(q));
+                p.visible = match;
+                if (match) count++;
+            });
+            showToast(`🔍 找到 ${count} 颗星球`, '探索');
+        }
+
+        // ================================================================
+        //  🎨 颜色指南
+        // ================================================================
+        let guideOpen = false;
+        document.getElementById('colorGuideToggle').onclick = () => {
+            guideOpen = !guideOpen;
+            document.getElementById('colorGuidePanel').classList.toggle('open', guideOpen);
+        };
+
+        // ================================================================
+        //  💬 Toast
+        // ================================================================
+        let toastTimer;
+
+        function showToast(msg, label) {
+            const t = document.getElementById('toastMsg');
+            document.getElementById('toastContent').textContent = msg;
+            document.getElementById('toastLabel').textContent = label || '💡 提示';
+            t.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+        }
+
+        // ================================================================
+        //  🎬 动画
+        // ================================================================
+        function animate() {
+            requestAnimationFrame(animate);
+            const t = performance.now() / 1000;
+
+            planets.forEach(p => {
+                const d = p.userData;
+                if (d) {
+                    const offset = Math.sin(t * d.floatSpeed + d.phase) * d.floatAmp;
+                    p.position.y = d.baseY + offset;
+                    p.rotation.y += d.rotSpeed * 0.004;
+                    if (d.ring) {
+                        d.ring.rotation.x += 0.002;
+                        d.ring.rotation.z += 0.001;
+                    }
+                    if (d.ring2) {
+                        d.ring2.rotation.x += 0.001;
+                        d.ring2.rotation.z -= 0.001;
+                    }
+                    if (d.flow) {
+                        d.flowAngle += 0.025;
+                        const rr = d.size * 1.7;
+                        const fp = d.flow.geometry.attributes.position.array;
+                        fp[0] = Math.cos(d.flowAngle) * rr;
+                        fp[1] = Math.sin(d.flowAngle * 0.2) * 0.05;
+                        fp[2] = Math.sin(d.flowAngle) * rr;
+                        d.flow.geometry.attributes.position.needsUpdate = true;
+                    }
+                    if (d.core) {
+                        const pulse = 1 + Math.sin(t * 0.5 + d.phase) * 0.025;
+                        d.core.scale.set(pulse, pulse, pulse);
+                    }
+                    if (d.inner) {
+                        const pulse = 1 + Math.sin(t * 0.7 + d.phase) * 0.035;
+                        d.inner.scale.set(pulse, pulse, pulse);
+                        d.inner.material.opacity = 0.2 + Math.sin(t * 0.7 + d.phase) * 0.05;
+                    }
+                }
+            });
+
+            stars.rotation.y += 0.00004;
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            const w = container.clientWidth,
+                h = container.clientHeight;
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+            renderer.setSize(w, h);
+        });
+
+        // ================================================================
+        //  🚀 启动
+        // ================================================================
+        loadData();
+        rebuildScene();
+
+        console.log('🪐 记忆星球 v5.1');
+        console.log(`📚 ${allMemories.length} 颗星球 · 已调小 · 分布更开`);
+    </script>
+</body>
+</html>
