@@ -26,7 +26,7 @@
 }
 
 [data-theme="light"] {
-    --bg-primary: #f0f4fa;
+    --bg-primary: #0b0d10;
     --bg-card: rgba(255,255,255,0.7);
     --bg-card-hover: #ffffff;
     --border-subtle: rgba(0,0,0,0.06);
