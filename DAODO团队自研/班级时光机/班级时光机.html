@@ -8,10 +8,8 @@
     <!-- Logo Favicon -->
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cdefs%3E%3ClinearGradient id='f' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2381C9FF'/%3E%3Cstop offset='100%25' stop-color='%23A78BFA'/%3E%3C/linearGradient%3E%3Cfilter id='g'%3E%3CfeGaussianBlur stdDeviation='2' result='b'/%3E%3CfeMerge%3E%3CfeMergeNode in='b'/%3E%3CfeMergeNode in='SourceGraphic'/%3E%3C/feMerge%3E%3C/filter%3E%3C/defs%3E%3Crect x='0' y='0' width='200' height='200' rx='40' fill='%230b0d10'/%3E%3Crect x='10' y='10' width='180' height='180' rx='40' fill='rgba(255,255,255,0.04)' stroke='rgba(255,255,255,0.06)' stroke-width='2'/%3E%3Cpath d='M 42 70 L 26 100 L 42 130' fill='none' stroke='%2381C9FF' stroke-width='6' stroke-linecap='round' stroke-linejoin='round' opacity='0.7'/%3E%3Cpath d='M 62 78 Q 82 58 100 78 Q 118 58 138 78 L 138 122 Q 118 102 100 122 Q 82 102 62 122 Z' fill='rgba(255,255,255,0.06)' stroke='url(%23f)' stroke-width='2.5' filter='url(%23g)'/%3E%3Cline x1='100' y1='65' x2='100' y2='135' stroke='rgba(255,255,255,0.15)' stroke-width='2'/%3E%3Ccircle cx='100' cy='100' r='22' fill='none' stroke='url(%23f)' stroke-width='2.5'/%3E%3Cline x1='100' y1='100' x2='100' y2='84' stroke='url(%23f)' stroke-width='2.5' stroke-linecap='round'/%3E%3Cline x1='100' y1='100' x2='114' y2='106' stroke='url(%23f)' stroke-width='2' stroke-linecap='round'/%3E%3Ccircle cx='100' cy='100' r='3' fill='url(%23f)'/%3E%3Cpath d='M 158 70 L 174 100 L 158 130' fill='none' stroke='%2381C9FF' stroke-width='6' stroke-linecap='round' stroke-linejoin='round' opacity='0.7'/%3E%3Ccircle cx='174' cy='168' r='5' fill='%23A78BFA' opacity='0.5'/%3E%3C/svg%3E">
 
-    <!-- 外部样式 -->
     <link rel="stylesheet" href="style.css" />
 
-    <!-- 第三方库 -->
     <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.1/dist/cropper.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.1/dist/cropper.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" />
@@ -22,10 +20,8 @@
 </head>
 <body>
 
-    <!-- ===== 背景光晕（跟随鼠标） ===== -->
+    <!-- ===== 全局背景 ===== -->
     <div class="bg-glow" id="bgGlow"></div>
-
-    <!-- ===== 粒子背景 ===== -->
     <div id="particles"></div>
 
     <!-- ===== Toast ===== -->
@@ -35,7 +31,6 @@
          认证页
          ================================================================ -->
     <div class="auth-wrap" id="authWrap">
-        <div id="particles"></div>
         <div class="auth-card">
             <div class="auth-logo">
                 <svg viewBox="0 0 200 200" width="48" height="48"><use href="#logo-svg"></use></svg>
@@ -71,19 +66,17 @@
     </div>
 
     <!-- ================================================================
-         主界面（登录后）
+         主界面
          ================================================================ -->
     <div class="main-wrap" id="mainWrap">
 
-        <!-- ===== 顶部导航 ===== -->
+        <!-- 顶部导航 -->
         <header class="top-nav" id="topNav">
             <div class="top-nav-inner">
-                <!-- 主主页顶部 -->
                 <div class="top-nav-left" id="homeTopLeft">
                     <svg viewBox="0 0 200 200" width="28" height="28" class="nav-logo"><use href="#logo-svg"></use></svg>
                     <span class="nav-title" id="homeNavTitle">班级时光机</span>
                 </div>
-                <!-- 副主页顶部（默认隐藏） -->
                 <div class="top-nav-left hidden" id="classTopLeft">
                     <button class="nav-back" id="navBackBtn"><i class="fa fa-arrow-left"></i></button>
                     <span class="nav-title" id="classNavTitle">班级空间</span>
@@ -95,12 +88,10 @@
             </div>
         </header>
 
-        <!-- ===== 视图容器 ===== -->
+        <!-- 视图容器 -->
         <div class="view-container" id="viewContainer">
 
-            <!-- ===========================================================
-                 视图：主主页（班级大厅）
-                 =========================================================== -->
+            <!-- 主主页 -->
             <div class="view active" id="view-home">
                 <div class="view-content">
                     <div class="panel">
@@ -118,21 +109,31 @@
                 </div>
             </div>
 
-            <!-- ===========================================================
-                 视图：副主页（班级空间）
-                 =========================================================== -->
+            <!-- 副主页 -->
             <div class="view" id="view-class">
                 <div class="view-content">
-                    <!-- 由 JS 动态渲染 -->
                     <div id="classSpaceContent"></div>
                 </div>
             </div>
 
-        </div><!-- /view-container -->
+            <!-- 个人中心（独立视图） -->
+            <div class="view" id="view-profile">
+                <div class="view-content">
+                    <div id="profileContent"></div>
+                </div>
+            </div>
 
-        <!-- ===== 底部导航 ===== -->
+            <!-- 设置（独立视图） -->
+            <div class="view" id="view-settings">
+                <div class="view-content">
+                    <div id="settingsContent"></div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 底部导航 -->
         <nav class="bottom-nav" id="bottomNav">
-            <!-- 主主页底部（5项） -->
             <div class="nav-items" id="navMainItems">
                 <button class="nav-item active" data-tab="home"><i class="fa fa-home"></i><span>主页</span></button>
                 <button class="nav-item" data-tab="myclasses"><i class="fa fa-book"></i><span>班级</span></button>
@@ -140,7 +141,6 @@
                 <button class="nav-item" data-tab="profile"><i class="fa fa-user"></i><span>我的</span></button>
                 <button class="nav-item" data-tab="settings"><i class="fa fa-gear"></i><span>设置</span></button>
             </div>
-            <!-- 副主页底部（5项，默认隐藏） -->
             <div class="nav-items hidden" id="navClassItems">
                 <button class="nav-item active" data-tab="dynamic"><i class="fa fa-rss"></i><span>动态</span></button>
                 <button class="nav-item" data-tab="messages"><i class="fa fa-comments"></i><span>消息</span></button>
@@ -150,7 +150,7 @@
             </div>
         </nav>
 
-        <!-- ===== 更多抽屉 ===== -->
+        <!-- 更多抽屉 -->
         <div class="drawer-overlay" id="drawerOverlay">
             <div class="drawer" id="drawer">
                 <div class="drawer-header"><span>更多功能</span><button class="drawer-close" id="drawerClose"><i class="fa fa-times"></i></button></div>
@@ -161,16 +161,16 @@
                     <button class="drawer-item" data-tab="teacher"><i class="fa fa-graduation-cap"></i>教师寄语</button>
                     <button class="drawer-item" data-tab="myLike"><i class="fa fa-heart"></i>我的点赞</button>
                     <button class="drawer-item" data-tab="myCollect"><i class="fa fa-bookmark"></i>我的收藏</button>
-                    <button class="drawer-item" data-tab="changelog"><i class="fa fa-history"></i>更新日志</button>
+                    <button class="drawer-item" data-tab="treehole"><i class="fa fa-tree"></i>匿名树洞</button>
                     <button class="drawer-item" data-tab="admin" id="drawerAdmin" style="display:none;"><i class="fa fa-shield"></i>管理后台</button>
                 </div>
             </div>
         </div>
 
-    </div><!-- /main-wrap -->
+    </div>
 
     <!-- ================================================================
-         所有模态框
+         模态框（所有弹窗）
          ================================================================ -->
     <!-- 创建班级 -->
     <div class="modal-mask" id="createClassModal">
@@ -185,18 +185,18 @@
         </div>
     </div>
 
-    <!-- 加入班级 -->
+    <!-- 加入班级（含搜索框） -->
     <div class="modal-mask" id="joinClassModal">
         <div class="modal">
             <h3>🔍 加入班级</h3>
-            <div class="form-item"><label>搜索班级</label><input id="joinClassSearch" placeholder="输入班级名称或编号..." /></div>
+            <div class="form-item"><label>搜索班级名称</label><input id="joinClassSearch" placeholder="输入班级名称..." /></div>
             <div id="joinClassResults" style="max-height:200px;overflow-y:auto;"></div>
             <div class="form-item" style="margin-top:12px;"><label>或输入邀请码</label><input id="joinClassInviteCode" placeholder="输入邀请码" /></div>
             <div class="modal-btns"><button class="btn-cancel" id="joinClassCancel">取消</button><button class="btn-save" id="joinClassConfirm">加入</button></div>
         </div>
     </div>
 
-    <!-- 写时间胶囊 -->
+    <!-- 时间胶囊 -->
     <div class="modal-mask" id="writeCapsuleModal">
         <div class="modal">
             <h3>✉️ 写一封时间胶囊</h3>
@@ -207,7 +207,7 @@
         </div>
     </div>
 
-    <!-- 添加大事记 -->
+    <!-- 大事记 -->
     <div class="modal-mask" id="addTimelineModal">
         <div class="modal">
             <h3>📜 添加大事记</h3>
@@ -230,7 +230,7 @@
         </div>
     </div>
 
-    <!-- 发布通知 -->
+    <!-- 通知 -->
     <div class="modal-mask" id="newNoticeModal">
         <div class="modal">
             <h3>发布通知</h3>
@@ -241,7 +241,7 @@
         </div>
     </div>
 
-    <!-- 发起投票 -->
+    <!-- 投票 -->
     <div class="modal-mask" id="newPollModal">
         <div class="modal">
             <h3>发起投票</h3>
@@ -252,7 +252,7 @@
         </div>
     </div>
 
-    <!-- 添加班级事件 -->
+    <!-- 日历事件 -->
     <div class="modal-mask" id="addEventModal">
         <div class="modal">
             <h3>添加班级事件</h3>
