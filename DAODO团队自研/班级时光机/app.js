@@ -4,6 +4,10 @@
 //  支持主主页（班级大厅） ↔ 副主页（班级空间）双视图切换
 // ================================================================
 
+// 占位函数（旧架构残留）
+function renderSidebarLevel() {}
+function updateSidebarMenu() {}
+
 // ---------- 全局状态 ----------
 var isOwner = false;
 var currentUser = null;
@@ -313,28 +317,27 @@ async function autoLogin() {
             await loadUserClasses();
             enterMain();
             initOwnerAccount();
-            setTimeout(function() {
-                renderHomeView();
-                updateUIForView('home');
-                loadDynamics(true);
-                loadNotice();
-                loadPolls();
-                loadDoc();
-                loadCalendar();
-                loadAlbum();
-                loadContactList();
-                updateMsgBadge();
-                applySettings();
-                subscribeToMessages();
-                renderSidebarLevel();
-                loadEquippedItems();
-                loadTeacherMessages();
-                loadCapsules();
-                loadTimeline();
-                loadDestinations();
-                renderClassList();
-                checkForNewVersion();
-            }, 200);
+setTimeout(function() {
+    goHome();  // 直接切换到主主页
+    loadDynamics(true);
+    loadNotice();
+    loadPolls();
+    loadDoc();
+    loadCalendar();
+    loadAlbum();
+    loadContactList();
+    updateMsgBadge();
+    applySettings();
+    subscribeToMessages();
+    renderSidebarLevel(); // 可保留（但需定义）
+    loadEquippedItems();
+    loadTeacherMessages();
+    loadCapsules();
+    loadTimeline();
+    loadDestinations();
+    renderClassList();
+    checkForNewVersion();
+}, 200);
             return true;
         }
     }
@@ -438,7 +441,6 @@ async function loadUserClasses() {
         currentClassRole = userClasses[0].role;
     }
     renderClassList();
-    updateUIForView('home'); // 刷新底部高亮
 }
 
 async function renderClassList() {
@@ -2488,12 +2490,14 @@ window.onload = async function() {
     document.getElementById('toFindPwd').onclick = function() { document.getElementById('loginBox').classList.add('hidden'); document.getElementById('findPwdBox').classList.remove('hidden'); };
     document.getElementById('backLogin').onclick = function() { document.getElementById('findPwdBox').classList.add('hidden'); document.getElementById('loginBox').classList.remove('hidden'); };
 
-    document.getElementById('loginBtn').onclick = function() {
-        var email = document.getElementById('loginEmail').value.trim();
-        var pwd = document.getElementById('loginPwd').value.trim();
-        if (!email || !pwd) { toast('请填写邮箱和密码'); return; }
-        signIn(email, pwd);
-    };
+document.getElementById('loginBtn').onclick = function() {
+    var btn = this;
+    btn.disabled = true;
+    var email = document.getElementById('loginEmail').value.trim();
+    var pwd = document.getElementById('loginPwd').value.trim();
+    if (!email || !pwd) { toast('请填写邮箱和密码'); btn.disabled = false; return; }
+    signIn(email, pwd).finally(function() { btn.disabled = false; });
+};
     document.getElementById('regBtn').onclick = function() {
         var name = document.getElementById('regName').value.trim();
         var email = document.getElementById('regEmail').value.trim();
@@ -2573,6 +2577,5 @@ window.onload = async function() {
         }
         smoothGlow();
     })();
-
     console.log('📺 班级时光机 v3.2 已启动！');
 };
