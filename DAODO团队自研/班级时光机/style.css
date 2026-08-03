@@ -657,3 +657,29 @@ body {
     .modal { padding: 16px; margin: 10px; }
     .checkbox-row { gap: 12px; }
 }
+
+/* ===== 呼吸动画（官网同款） ===== */
+@keyframes breathe {
+    0%, 100% { 
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+    50% { 
+        box-shadow: 0 8px 48px rgba(129, 201, 255, 0.08), 0 0 60px rgba(129, 201, 255, 0.03);
+    }
+}
+.glass-card, .panel {
+    animation: breathe 4s ease-in-out infinite;
+}
+/* 浅色模式下呼吸动画减弱 */
+[data-theme="light"] .glass-card,
+[data-theme="light"] .panel {
+    animation: breathe-light 4s ease-in-out infinite;
+}
+@keyframes breathe-light {
+    0%, 100% { 
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    }
+    50% { 
+        box-shadow: 0 8px 32px rgba(129, 201, 255, 0.08);
+    }
+}
