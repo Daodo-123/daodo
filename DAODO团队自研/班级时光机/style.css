@@ -71,7 +71,7 @@ body {
 
 /* ===== 粒子背景 ===== */
 #particles {
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 0;
     width: 100%;
@@ -129,8 +129,11 @@ body {
     justify-content: center;
     padding: 20px;
     background: var(--bg-primary);
+    overflow: hidden;
 }
 .auth-card {
+    position: relative;
+    z-index: 1;
     width: 100%;
     max-width: 440px;
     background: var(--bg-card);
@@ -139,6 +142,8 @@ body {
     padding: 36px 40px;
     border: 1px solid var(--border-subtle);
     box-shadow: var(--shadow-card);
+    animation: fadeIn 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+    opacity: 0;
 }
 .auth-logo {
     display: flex;
@@ -677,4 +682,8 @@ body {
     50% { 
         box-shadow: 0 8px 32px rgba(129, 201, 255, 0.08);
     }
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.96) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
 }
