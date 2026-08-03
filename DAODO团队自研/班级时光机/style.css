@@ -4,7 +4,7 @@
    ================================================================ */
 
 :root {
-    --bg-primary: #0b0d10;
+    --bg-primary: #0b0d10 !important;
     --bg-card: rgba(255,255,255,0.04);
     --bg-card-hover: rgba(255,255,255,0.08);
     --border-subtle: rgba(255,255,255,0.06);
@@ -134,7 +134,7 @@ body {
     align-items: center;
     justify-content: center;
     padding: 20px;
-    background: var(--bg-primary);
+    background: #0b0d10 !important;
     overflow: hidden;
 }
 .auth-card {
