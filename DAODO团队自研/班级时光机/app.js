@@ -2534,9 +2534,10 @@ window.onload = async function() {
     }
     smoothGlow();
 
-    // 粒子
+    // 粒子生成
     (function() {
         var container = document.getElementById('particles');
+        if (!container) return;
         var count = 40;
         for (var i = 0; i < count; i++) {
             var particle = document.createElement('div');
@@ -2551,6 +2552,28 @@ window.onload = async function() {
             container.appendChild(particle);
         }
     })();
+
+    // 鼠标光晕跟踪
+    (function() {
+        var glow = document.getElementById('bgGlow');
+        if (!glow) return;
+        var targetX = window.innerWidth / 2;
+        var targetY = window.innerHeight / 2;
+        var currentX = targetX;
+        var currentY = targetY;
+        document.addEventListener('mousemove', function(e) {
+            targetX = e.clientX;
+            targetY = e.clientY;
+        });
+        function smoothGlow() {
+            currentX += (targetX - currentX) * 0.08;
+            currentY += (targetY - currentY) * 0.08;
+            glow.style.transform = 'translate(' + currentX + 'px, ' + currentY + 'px)';
+            requestAnimationFrame(smoothGlow);
+        }
+        smoothGlow();
+    })();
+};
 
     console.log('✅ 班级时光机 v3.2 已启动！');
 };
