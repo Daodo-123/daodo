@@ -61,7 +61,7 @@ body {
     left: -600px;
     width: 1200px;
     height: 1200px;
-    background: radial-gradient(circle, rgba(129,201,255,0.18) 0%, rgba(167,139,250,0.06) 40%, transparent 70%);
+    background: radial-gradient(circle, rgba(129,201,255,0.2) 0%, rgba(167,139,250,0.06) 40%, transparent 70%);
     border-radius: 50%;
     pointer-events: none;
     z-index: 0;
@@ -74,7 +74,7 @@ body {
 
 /* ===== 粒子背景 ===== */
 #particles {
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 0;
     width: 100%;
