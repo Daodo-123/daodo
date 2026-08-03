@@ -2571,7 +2571,8 @@ window.onload = async function() {
             glow.style.transform = 'translate(' + currentX + 'px, ' + currentY + 'px)';
             requestAnimationFrame(smoothGlow);
         }
-               smoothGlow();
+        smoothGlow();
     })();
+
     console.log('📺 班级时光机 v3.2 已启动！');
 };
