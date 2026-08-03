@@ -56,19 +56,17 @@ body {
 /* ===== 背景光晕（跟随鼠标） ===== */
 .bg-glow {
     position: fixed;
-    top: -400px;
-    left: -400px;
-    width: 800px;            /* 和官网一致 */
-    height: 800px;           /* 和官网一致 */
-    background: radial-gradient(circle, rgba(129, 201, 255, 0.12) 0%, rgba(167, 139, 250, 0.04) 40%, transparent 70%);
+    top: -600px;
+    left: -600px;
+    width: 1200px;       /* 原来是 800px */
+    height: 1200px;      /* 原来是 800px */
+    background: radial-gradient(circle, rgba(129,201,255,0.25) 0%, rgba(167,139,250,0.08) 40%, transparent 70%);
+    /* 提高透明度：0.10 → 0.25，0.04 → 0.08 */
     border-radius: 50%;
     pointer-events: none;
     z-index: 0;
     transition: transform 0.12s ease-out, opacity 0.3s ease;
     will-change: transform;
-}
-[data-theme="light"] .bg-glow {
-    background: radial-gradient(circle, rgba(129,201,255,0.12) 0%, rgba(167,139,250,0.06) 40%, transparent 70%);
 }
 
 /* ===== 粒子背景 ===== */
@@ -83,13 +81,10 @@ body {
 }
 .particle {
     position: absolute;
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.3);
     border-radius: 50%;
     animation: floatParticle linear infinite;
     opacity: 0;
-}
-[data-theme="light"] .particle {
-    background: rgba(0, 0, 0, 0.08);
 }
 @keyframes floatParticle {
     0% { transform: translateY(100vh) scale(0.5); opacity: 0; }
