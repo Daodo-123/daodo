@@ -1,29 +1,34 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>班级时光机 · v3.1.0</title>
-    
-    <!-- 毛玻璃 Favicon -->
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3Cfilter id='g'%3E%3CfeGaussianBlur stdDeviation='2'/%3E%3C/filter%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='48' fill='rgba(255,255,255,0.7)' filter='url(%23g)'/%3E%3Ccircle cx='50' cy='50' r='48' fill='none' stroke='rgba(255,255,255,0.5)' stroke-width='1.5'/%3E%3Ctext x='50' y='68' font-size='52' font-weight='700' text-anchor='middle' fill='%23D4AF37' font-family='system-ui' letter-spacing='2'%3E20%3C/text%3E%3C/svg%3E">
-    
-    <!-- ===== 外部样式 ===== -->
-    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+    <title>班级时光机 · v3.2</title>
 
-    <!-- ===== 第三方库（按需加载） ===== -->
+    <!-- Logo Favicon -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cdefs%3E%3ClinearGradient id='f' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2381C9FF'/%3E%3Cstop offset='100%25' stop-color='%23A78BFA'/%3E%3C/linearGradient%3E%3Cfilter id='g'%3E%3CfeGaussianBlur stdDeviation='2' result='b'/%3E%3CfeMerge%3E%3CfeMergeNode in='b'/%3E%3CfeMergeNode in='SourceGraphic'/%3E%3C/feMerge%3E%3C/filter%3E%3C/defs%3E%3Crect x='0' y='0' width='200' height='200' rx='40' fill='%230b0d10'/%3E%3Crect x='10' y='10' width='180' height='180' rx='40' fill='rgba(255,255,255,0.04)' stroke='rgba(255,255,255,0.06)' stroke-width='2'/%3E%3Cpath d='M 42 70 L 26 100 L 42 130' fill='none' stroke='%2381C9FF' stroke-width='6' stroke-linecap='round' stroke-linejoin='round' opacity='0.7'/%3E%3Cpath d='M 62 78 Q 82 58 100 78 Q 118 58 138 78 L 138 122 Q 118 102 100 122 Q 82 102 62 122 Z' fill='rgba(255,255,255,0.06)' stroke='url(%23f)' stroke-width='2.5' filter='url(%23g)'/%3E%3Cline x1='100' y1='65' x2='100' y2='135' stroke='rgba(255,255,255,0.15)' stroke-width='2'/%3E%3Ccircle cx='100' cy='100' r='22' fill='none' stroke='url(%23f)' stroke-width='2.5'/%3E%3Cline x1='100' y1='100' x2='100' y2='84' stroke='url(%23f)' stroke-width='2.5' stroke-linecap='round'/%3E%3Cline x1='100' y1='100' x2='114' y2='106' stroke='url(%23f)' stroke-width='2' stroke-linecap='round'/%3E%3Ccircle cx='100' cy='100' r='3' fill='url(%23f)'/%3E%3Cpath d='M 158 70 L 174 100 L 158 130' fill='none' stroke='%2381C9FF' stroke-width='6' stroke-linecap='round' stroke-linejoin='round' opacity='0.7'/%3E%3Ccircle cx='174' cy='168' r='5' fill='%23A78BFA' opacity='0.5'/%3E%3C/svg%3E">
+
+    <!-- 外部样式 -->
+    <link rel="stylesheet" href="style.css" />
+
+    <!-- 第三方库 -->
     <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.1/dist/cropper.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.1/dist/cropper.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.1/dist/cropper.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
-<!-- ================================================================
-     TOAST 提示
-     ================================================================ -->
+
+    <!-- ===== 背景光晕（跟随鼠标） ===== -->
+    <div class="bg-glow" id="bgGlow"></div>
+
+    <!-- ===== 粒子背景 ===== -->
+    <div id="particles"></div>
+
+    <!-- ===== Toast ===== -->
     <div class="toast" id="toast"></div>
 
     <!-- ================================================================
@@ -32,46 +37,32 @@
     <div class="auth-wrap" id="authWrap">
         <div class="auth-card">
             <div class="auth-logo">
-                <div class="logo-icon">
-                    <svg viewBox="0 0 100 100" width="40" height="40">
-                        <defs>
-                            <filter id="authLogoBlur"><feGaussianBlur stdDeviation="2.5"/></filter>
-                            <radialGradient id="authLogoGlow" cx="30%" cy="30%">
-                                <stop offset="0%" stop-color="white" stop-opacity="0.5"/>
-                                <stop offset="100%" stop-color="white" stop-opacity="0"/>
-                            </radialGradient>
-                        </defs>
-                        <circle cx="50" cy="50" r="46" fill="rgba(255,255,255,0.6)" filter="url(#authLogoBlur)"/>
-                        <circle cx="50" cy="50" r="46" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
-                        <circle cx="50" cy="50" r="46" fill="url(#authLogoGlow)" opacity="0.3"/>
-                        <text x="50" y="74" font-size="72" font-weight="700" text-anchor="middle" fill="#D4AF37" font-family="system-ui" letter-spacing="1">20</text>
-                    </svg>
-                </div>
+                <svg viewBox="0 0 200 200" width="48" height="48"><use href="#logo-svg"></use></svg>
                 <span>班级时光机 · <span class="gold">登录</span></span>
             </div>
             <div id="loginBox">
                 <h2>登录</h2>
-                <div class="form-item"><label>邮箱</label><input type="email" id="loginEmail" placeholder="输入注册邮箱"></div>
-                <div class="form-item"><label>密码</label><input type="password" id="loginPwd" placeholder="输入密码"></div>
+                <div class="form-item"><label>邮箱</label><input type="email" id="loginEmail" placeholder="输入注册邮箱" /></div>
+                <div class="form-item"><label>密码</label><input type="password" id="loginPwd" placeholder="输入密码" /></div>
                 <div class="checkbox-row">
-                    <label><input type="checkbox" id="autoLoginCheck"> 自动登录</label>
-                    <label><input type="checkbox" id="rememberPwdCheck"> 记住密码</label>
+                    <label><input type="checkbox" id="autoLoginCheck" /> 自动登录</label>
+                    <label><input type="checkbox" id="rememberPwdCheck" /> 记住密码</label>
                 </div>
                 <button class="btn-main" id="loginBtn">登录</button>
-                <div class="switch-text"><span id="toReg">没有账号？去注册</span><br><span id="toFindPwd">忘记密码？</span></div>
+                <div class="switch-text"><span id="toReg">没有账号？去注册</span><br /><span id="toFindPwd">忘记密码？</span></div>
             </div>
             <div id="regBox" class="hidden">
                 <h2>注册账号</h2>
-                <div class="form-item"><label>用户名（0~15位）</label><input id="regName" placeholder="0~15位字符"></div>
-                <div class="form-item"><label>邮箱</label><input id="regEmail" placeholder="任意邮箱格式"></div>
-                <div class="form-item"><label>密码（6~20位）</label><input type="password" id="regPwd"></div>
-                <div class="form-item"><label>确认密码</label><input type="password" id="regPwd2"></div>
+                <div class="form-item"><label>用户名（0~15位）</label><input id="regName" placeholder="0~15位字符" /></div>
+                <div class="form-item"><label>邮箱</label><input id="regEmail" placeholder="任意邮箱格式" /></div>
+                <div class="form-item"><label>密码（6~20位）</label><input type="password" id="regPwd" /></div>
+                <div class="form-item"><label>确认密码</label><input type="password" id="regPwd2" /></div>
                 <button class="btn-main" id="regBtn">注册</button>
                 <div class="switch-text"><span id="toLogin">已有账号？去登录</span></div>
             </div>
             <div id="findPwdBox" class="hidden">
                 <h2>找回密码</h2>
-                <div class="form-item"><label>注册邮箱</label><input id="findEmail"></div>
+                <div class="form-item"><label>注册邮箱</label><input id="findEmail" /></div>
                 <button class="btn-main" id="findBtn">查询密码</button>
                 <div class="switch-text"><span id="backLogin">返回登录</span></div>
             </div>
@@ -79,392 +70,116 @@
     </div>
 
     <!-- ================================================================
-         主界面
+         主界面（登录后）
          ================================================================ -->
     <div class="main-wrap" id="mainWrap">
-        <!-- 侧边栏遮罩（手机） -->
-        <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-        <!-- ===== 侧边栏 ===== -->
-        <div class="sidebar" id="sidebar">
-            <div class="sidebar-title">
-                <svg viewBox="0 0 100 100" width="32" height="32" style="flex-shrink:0;">
-                    <defs>
-                        <filter id="sideLogoBlur"><feGaussianBlur stdDeviation="2"/></filter>
-                        <radialGradient id="sideLogoGlow" cx="30%" cy="30%">
-                            <stop offset="0%" stop-color="white" stop-opacity="0.5"/>
-                            <stop offset="100%" stop-color="white" stop-opacity="0"/>
-                        </radialGradient>
-                    </defs>
-                    <circle cx="50" cy="50" r="44" fill="rgba(255,255,255,0.6)" filter="url(#sideLogoBlur)"/>
-                    <circle cx="50" cy="50" r="44" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
-                    <circle cx="50" cy="50" r="44" fill="url(#sideLogoGlow)" opacity="0.3"/>
-                    <text x="50" y="70" font-size="64" font-weight="700" text-anchor="middle" fill="#D4AF37" font-family="system-ui" letter-spacing="1">20</text>
-                </svg>
-                <span class="title-text" id="pageTitle">班级时光机</span>
-                <button class="settings-btn" id="settingsBtn"><i class="fa fa-gear"></i></button>
+        <!-- ===== 顶部导航 ===== -->
+        <header class="top-nav" id="topNav">
+            <div class="top-nav-inner">
+                <!-- 主主页顶部 -->
+                <div class="top-nav-left" id="homeTopLeft">
+                    <svg viewBox="0 0 200 200" width="28" height="28" class="nav-logo"><use href="#logo-svg"></use></svg>
+                    <span class="nav-title" id="homeNavTitle">班级时光机</span>
+                </div>
+                <!-- 副主页顶部（默认隐藏） -->
+                <div class="top-nav-left hidden" id="classTopLeft">
+                    <button class="nav-back" id="navBackBtn"><i class="fa fa-arrow-left"></i></button>
+                    <span class="nav-title" id="classNavTitle">班级空间</span>
+                </div>
+                <div class="top-nav-right">
+                    <button class="nav-btn" id="navUserBtn" title="个人中心"><i class="fa fa-user"></i></button>
+                    <button class="nav-btn" id="navSettingsBtn" title="设置"><i class="fa fa-gear"></i></button>
+                </div>
+            </div>
+        </header>
+
+        <!-- ===== 视图容器 ===== -->
+        <div class="view-container" id="viewContainer">
+
+            <!-- ===========================================================
+                 视图：主主页（班级大厅）
+                 =========================================================== -->
+            <div class="view active" id="view-home">
+                <div class="view-content">
+                    <div class="panel">
+                        <h3>📚 我的班级 <span class="class-count" id="classCount"></span></h3>
+                        <div id="myClassList" class="class-grid"></div>
+                        <div class="action-row">
+                            <button class="btn-main" id="createClassBtn">➕ 创建班级</button>
+                            <button class="btn-outline" id="joinClassBtn">🔍 加入班级</button>
+                        </div>
+                    </div>
+                    <div class="panel">
+                        <h3>📢 平台公告</h3>
+                        <div id="platformAnnouncement" class="announcement-text">欢迎来到班级时光机！在这里记录你的成长足迹 🎓</div>
+                    </div>
+                </div>
             </div>
 
-            <!-- 班级切换器 -->
-            <div class="class-switcher" id="classSwitcher">
-                <button class="class-switcher-btn" id="classSwitcherBtn">
-                    <span id="currentClassName">加载中...</span>
-                    <span class="arrow" id="classArrow">▾</span>
-                </button>
-                <div class="class-dropdown" id="classDropdown"></div>
+            <!-- ===========================================================
+                 视图：副主页（班级空间）
+                 =========================================================== -->
+            <div class="view" id="view-class">
+                <div class="view-content">
+                    <!-- 由 JS 动态渲染 -->
+                    <div id="classSpaceContent"></div>
+                </div>
             </div>
 
-            <!-- 侧边栏菜单 -->
-            <div class="sidebar-menu" id="sidebarMenu">
-                <div data-page="home" class="active"><i class="fa fa-home"></i>主页</div>
-                <div data-page="search"><i class="fa fa-search"></i>搜索</div>
-                <div data-page="findclass"><i class="fa fa-plus-circle"></i>查找班级</div>
-                <div data-page="dynamic" style="display:none;"><i class="fa fa-rss"></i>动态</div>
-                <div data-page="messages" id="msgMenu" style="display:none;"><i class="fa fa-comments"></i>消息 <span class="msg-badge hidden" id="msgBadge">0</span></div>
-                <div data-page="notice" style="display:none;"><i class="fa fa-bullhorn"></i>通知</div>
-                <div data-page="functions" style="display:none;"><i class="fa fa-cubes"></i>功能</div>
-                <div data-page="capsule" style="display:none;"><i class="fa fa-clock-o"></i>时间胶囊</div>
-                <div data-page="timeline" style="display:none;"><i class="fa fa-history"></i>班级大事记</div>
-                <div data-page="destinations" style="display:none;"><i class="fa fa-map-marker"></i>去向登记</div>
-                <div data-page="teacher" id="teacherMenu" style="display:none;"><i class="fa fa-graduation-cap"></i>教师寄语</div>
-                <div data-page="usercenter"><i class="fa fa-user"></i>个人中心</div>
-                <div data-page="myLike"><i class="fa fa-heart"></i>我的点赞</div>
-                <div data-page="myCollect"><i class="fa fa-bookmark"></i>我的收藏</div>
-                <div data-page="changelog"><i class="fa fa-history"></i>更新日志</div>
-                <div data-page="admin" id="adminMenu" style="display:none;"><i class="fa fa-shield"></i>管理后台</div>
-            </div>
+        </div><!-- /view-container -->
 
-            <div class="sidebar-footer">
-                <span class="username" id="sidebarUsername">用户</span>
-                <span class="role-tag" id="sidebarRoleTag" style="display:none;">🎓 教师</span>
-                <span class="level-badge-mini" id="sidebarLevelBadge" style="display:none;"></span>
-                <button class="refresh-btn" id="pageRefreshBtn"><i class="fa fa-refresh"></i></button>
+        <!-- ===== 底部导航 ===== -->
+        <nav class="bottom-nav" id="bottomNav">
+            <!-- 主主页底部（5项） -->
+            <div class="nav-items" id="navMainItems">
+                <button class="nav-item active" data-tab="home"><i class="fa fa-home"></i><span>主页</span></button>
+                <button class="nav-item" data-tab="myclasses"><i class="fa fa-book"></i><span>班级</span></button>
+                <button class="nav-item" data-tab="searchclass"><i class="fa fa-search"></i><span>搜索</span></button>
+                <button class="nav-item" data-tab="profile"><i class="fa fa-user"></i><span>我的</span></button>
+                <button class="nav-item" data-tab="settings"><i class="fa fa-gear"></i><span>设置</span></button>
+            </div>
+            <!-- 副主页底部（5项，默认隐藏） -->
+            <div class="nav-items hidden" id="navClassItems">
+                <button class="nav-item active" data-tab="dynamic"><i class="fa fa-rss"></i><span>动态</span></button>
+                <button class="nav-item" data-tab="messages"><i class="fa fa-comments"></i><span>消息</span></button>
+                <button class="nav-item" data-tab="notice"><i class="fa fa-bullhorn"></i><span>通知</span></button>
+                <button class="nav-item" data-tab="functions"><i class="fa fa-cubes"></i><span>功能</span></button>
+                <button class="nav-item" data-tab="more" id="moreBtn"><i class="fa fa-ellipsis-h"></i><span>更多</span></button>
+            </div>
+        </nav>
+
+        <!-- ===== 更多抽屉 ===== -->
+        <div class="drawer-overlay" id="drawerOverlay">
+            <div class="drawer" id="drawer">
+                <div class="drawer-header"><span>更多功能</span><button class="drawer-close" id="drawerClose"><i class="fa fa-times"></i></button></div>
+                <div class="drawer-grid">
+                    <button class="drawer-item" data-tab="capsule"><i class="fa fa-clock-o"></i>时间胶囊</button>
+                    <button class="drawer-item" data-tab="timeline"><i class="fa fa-history"></i>大事记</button>
+                    <button class="drawer-item" data-tab="destinations"><i class="fa fa-map-marker"></i>去向登记</button>
+                    <button class="drawer-item" data-tab="teacher"><i class="fa fa-graduation-cap"></i>教师寄语</button>
+                    <button class="drawer-item" data-tab="myLike"><i class="fa fa-heart"></i>我的点赞</button>
+                    <button class="drawer-item" data-tab="myCollect"><i class="fa fa-bookmark"></i>我的收藏</button>
+                    <button class="drawer-item" data-tab="changelog"><i class="fa fa-history"></i>更新日志</button>
+                    <button class="drawer-item" data-tab="admin" id="drawerAdmin" style="display:none;"><i class="fa fa-shield"></i>管理后台</button>
+                </div>
             </div>
         </div>
 
-        <!-- ===== 内容区 ===== -->
-        <div class="content" id="mainContent">
-
-            <!-- ===== 主页（班级大厅） ===== -->
-            <div class="page-box" id="page-home">
-                <div class="panel">
-                    <h3>📚 我的班级 <span style="font-size:0.8rem;font-weight:normal;color:var(--text-secondary);" id="classCount"></span></h3>
-                    <div id="myClassList" class="class-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;"></div>
-                    <div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;">
-                        <button class="btn-main" style="width:auto;padding:8px 28px;" id="createClassBtn">➕ 创建班级</button>
-                        <button class="btn-outline" id="joinClassBtn">🔍 加入班级</button>
-                    </div>
-                </div>
-                <div class="panel">
-                    <h3>📢 平台公告</h3>
-                    <div id="platformAnnouncement" style="color:var(--text-secondary);">
-                        欢迎来到班级时光机！在这里记录你的成长足迹 🎓
-                    </div>
-                </div>
-            </div>
-
-            <!-- ===== 查找班级 ===== -->
-            <div class="page-box hidden" id="page-findclass">
-                <div class="panel">
-                    <h3>🔍 查找班级</h3>
-                    <div style="display:flex;gap:8px;margin-bottom:16px;">
-                        <input id="findClassInput" placeholder="输入班级名称或邀请码" style="flex:1;padding:10px 16px;border:1px solid var(--border-color);border-radius:var(--radius-full);background:rgba(255,255,255,0.4);color:var(--text-primary);">
-                        <button class="btn-main" style="width:auto;padding:8px 24px;" id="findClassBtn">搜索</button>
-                    </div>
-                    <div id="findClassResults" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;"></div>
-                </div>
-            </div>
-
-            <!-- ===== 动态页 ===== -->
-            <div class="page-box hidden" id="page-dynamic">
-                <div class="panel">
-                    <h3>📝 发布动态 <span style="font-size:0.8rem;font-weight:normal;color:var(--text-secondary);" id="publishRemain"></span></h3>
-                    <div class="publish-area-wrapper">
-                        <textarea class="publish-area" id="publishText" placeholder="分享你的想法..." maxlength="500" style="width:100%;min-height:80px;padding:12px;padding-bottom:48px;border:1px solid var(--border-color);border-radius:var(--radius-sm);background:rgba(255,255,255,0.4);backdrop-filter:blur(8px);resize:vertical;color:var(--text-primary);transition:var(--transition);"></textarea>
-                        <button class="emoji-btn" id="pubEmojiBtn">😊</button>
-                        <div class="publish-counter" id="publishCounter" style="text-align:right;font-size:0.8rem;color:var(--text-light);margin-top:4px;">0 / 500</div>
-                    </div>
-                    <div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0;">
-                        <input id="publishTags" placeholder="标签（用逗号分隔，如 #学习,#日常）" style="flex:1;padding:8px 12px;border:1px solid var(--border-color);border-radius:var(--radius-full);background:rgba(255,255,255,0.4);color:var(--text-primary);font-size:0.85rem;">
-                    </div>
-                    <div class="media-select" style="margin:8px 0;">
-                        <input type="file" accept="image/*,video/*" id="publishMedia" style="font-size:0.85rem;">
-                        <img id="publishPreview" style="display:none;max-width:150px;border-radius:var(--radius-sm);margin-top:6px;">
-                        <div class="file-info" id="fileInfo" style="font-size:0.8rem;color:var(--text-light);"></div>
-                        <div class="upload-progress" id="uploadProgress" style="display:none;width:100%;height:4px;background:var(--border-color);border-radius:2px;margin-top:6px;overflow:hidden;"><div class="bar" id="uploadBar" style="height:100%;width:0%;background:var(--primary);border-radius:2px;transition:width 0.3s;"></div></div>
-                    </div>
-                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                        <button class="btn-main" style="width:auto;padding:8px 28px;" id="sendDynamic">发布</button>
-                        <button class="btn-outline" style="padding:8px 18px;" id="saveDraftBtn">💾 保存草稿</button>
-                    </div>
-                </div>
-                <div class="panel">
-                    <h3>📰 全部动态 <span style="font-size:0.8rem;font-weight:normal;color:var(--text-secondary);" id="hotTag"></span></h3>
-                    <div id="dynamicList"></div>
-                    <div id="loadMoreTrigger" style="text-align:center;padding:12px;color:var(--text-secondary);font-size:0.9rem;cursor:pointer;display:none;" onclick="loadDynamics(false)">加载更多...</div>
-                </div>
-            </div>
-
-            <!-- ===== 搜索页 ===== -->
-            <div class="page-box hidden" id="page-search">
-                <div class="panel">
-                    <h3>🔍 搜索</h3>
-                    <input placeholder="搜索用户名 / 动态 / 聊天记录 / 标签" id="searchInput" style="width:100%;padding:12px 16px;border:1px solid var(--border-color);border-radius:var(--radius-full);background:rgba(255,255,255,0.4);color:var(--text-primary);margin-bottom:12px;">
-                    <button class="btn-main" style="width:auto;padding:8px 28px;" id="searchBtn">搜索</button>
-                    <div id="searchResult" style="margin-top:16px;"></div>
-                </div>
-            </div>
-
-            <!-- ===== 消息页 ===== -->
-            <div class="page-box hidden" id="page-messages">
-                <div class="panel" style="padding:0;overflow:hidden;max-width:var(--content-max-width);margin:0 auto;">
-                    <div class="msg-page" id="msgPage">
-                        <div class="msg-contact-list" id="msgContactList">
-                            <div style="padding:12px;border-bottom:1px solid var(--border-color);display:flex;gap:8px;flex-wrap:wrap;">
-                                <button class="btn-sm" id="createGroupBtn2"><i class="fa fa-plus"></i> 建群</button>
-                                <button class="btn-sm" id="treeholeEntryBtn"><i class="fa fa-commenting-o"></i> 树洞</button>
-                                <button class="btn-sm" id="checkinBtn"><i class="fa fa-calendar-check-o"></i> 签到</button>
-                            </div>
-                            <div id="contactItems"></div>
-                        </div>
-                        <div class="msg-chat-area" id="msgChatArea">
-                            <div class="msg-chat-header" id="msgChatHeader">
-                                <span id="chatTargetName">请选择联系人</span>
-                                <div style="display:flex;align-items:center;gap:8px;">
-                                    <span style="font-size:0.8rem;color:var(--text-secondary);" id="chatTargetStatus"></span>
-                                    <button class="btn-sm" id="groupManageBtn" style="display:none;font-size:0.7rem;padding:4px 12px;"><i class="fa fa-cog"></i> 管理</button>
-                                </div>
-                            </div>
-                            <div class="msg-chat-messages" id="msgChatMessages"><div style="text-align:center;color:var(--text-light);padding:40px 0;">点击左侧联系人开始聊天</div></div>
-                            <div class="msg-chat-input" id="msgChatInput">
-                                <button class="emoji-btn" id="chatEmojiBtn">😊</button>
-                                <input id="chatInput" placeholder="输入消息... @DSAI 可提问">
-                                <button id="chatSendBtn"><i class="fa fa-send"></i></button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ===== 通知页 ===== -->
-            <div class="page-box hidden" id="page-notice">
-                <div class="panel">
-                    <h3>📢 通知 <button class="btn-sm" id="newNoticeBtn"><i class="fa fa-plus"></i> 发布通知</button></h3>
-                    <div id="noticeList"></div>
-                </div>
-            </div>
-
-            <!-- ===== 功能页 ===== -->
-            <div class="page-box hidden" id="page-functions">
-                <div class="panel">
-                    <h3>🧩 功能</h3>
-                    <div class="func-tabs" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
-                        <button class="func-tab active" data-func="polls" style="padding:6px 18px;border-radius:var(--radius-full);background:var(--primary);color:#fff;border:none;cursor:pointer;font-size:0.9rem;">投票</button>
-                        <button class="func-tab" data-func="docs" style="padding:6px 18px;border-radius:var(--radius-full);background:rgba(255,255,255,0.15);color:var(--text-secondary);border:none;cursor:pointer;font-size:0.9rem;">在线文档</button>
-                        <button class="func-tab" data-func="calendar" style="padding:6px 18px;border-radius:var(--radius-full);background:rgba(255,255,255,0.15);color:var(--text-secondary);border:none;cursor:pointer;font-size:0.9rem;">班级日历</button>
-                        <button class="func-tab" data-func="album" style="padding:6px 18px;border-radius:var(--radius-full);background:rgba(255,255,255,0.15);color:var(--text-secondary);border:none;cursor:pointer;font-size:0.9rem;">班级相册</button>
-                    </div>
-                    <div class="func-content active" id="func-polls"><button class="btn-sm" id="newPollBtn"><i class="fa fa-plus"></i> 发起投票</button><div id="pollList" style="margin-top:12px;"></div></div>
-                    <div class="func-content" id="func-docs"><input id="docTitleInput" placeholder="文档标题" style="width:100%;padding:10px;border:1px solid var(--border-color);border-radius:var(--radius-sm);background:rgba(255,255,255,0.4);margin-bottom:8px;"><textarea id="docContentInput" rows="8" style="width:100%;padding:10px;border:1px solid var(--border-color);border-radius:var(--radius-sm);background:rgba(255,255,255,0.4);font-family:monospace;resize:vertical;"></textarea><button class="btn-sm" id="saveDocBtn"><i class="fa fa-save"></i> 保存文档</button><div id="docPreview" style="padding:12px;border:1px solid var(--border-color);border-radius:var(--radius-sm);margin-top:10px;background:rgba(255,255,255,0.10);"></div></div>
-                    <div class="func-content" id="func-calendar"><button class="btn-sm" id="addEventBtn"><i class="fa fa-plus"></i> 添加事件</button><div id="calendarList" style="margin-top:12px;"></div></div>
-                    <div class="func-content" id="func-album"><div id="albumGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;"></div></div>
-                </div>
-            </div>
-
-            <!-- ===== 个人中心 ===== -->
-            <div class="page-box hidden" id="page-usercenter">
-                <div class="panel">
-                    <div id="userViewMode">
-                        <h3>👤 个人资料 <button class="btn-sm" style="float:right" id="openEditProfile">编辑资料</button></h3>
-                        <div style="display:flex;align-items:center;gap:20px;margin:16px 0;flex-wrap:wrap;">
-                            <div class="avatar-wrapper" id="userAvatarWrapper">
-                                <div class="avatar-frame" id="userAvatarFrame">
-                                    <img class="avatar" id="viewAvatar" style="width:80px;height:80px;">
-                                </div>
-                                <div class="avatar-pendant top-right" id="userAvatarPendant" style="display:none;"></div>
-                            </div>
-                            <div>
-                                <div class="nickname" id="viewNick" style="font-size:1.3rem;"></div>
-                                <div class="sign" id="viewSign" style="color:var(--text-secondary);"></div>
-                                <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;">
-                                    <span class="level-badge" id="viewLevelBadge"></span>
-                                    <span id="viewLevelTitle" style="font-size:0.9rem;color:var(--text-secondary);"></span>
-                                    <span class="teacher-tag" id="viewRoleTag" style="display:none;">🎓 教师</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:10px;background:rgba(255,255,255,0.10);padding:14px;border-radius:var(--radius-sm);margin-bottom:16px;">
-                            <div><span style="color:var(--text-secondary);font-size:0.8rem;">经验</span><br><span id="viewExp" style="font-weight:700;font-size:1.1rem;"></span></div>
-                            <div><span style="color:var(--text-secondary);font-size:0.8rem;">下一级</span><br><span id="viewNextExp" style="font-weight:700;font-size:1.1rem;"></span></div>
-                            <div><span style="color:var(--text-secondary);font-size:0.8rem;">积分</span><br><span id="viewPoints" style="font-weight:700;font-size:1.1rem;color:var(--gold);"></span></div>
-                            <div><span style="color:var(--text-secondary);font-size:0.8rem;">连续签到</span><br><span id="viewStreak" style="font-weight:700;font-size:1.1rem;"></span> 天</div>
-                        </div>
-                        <div class="view-line">邮箱：<span id="viewEmail"></span></div>
-                        <div class="view-line">星座：<span id="viewStar"></span></div>
-                        <div class="view-line">生日：<span id="viewBirth"></span></div>
-                        <div class="view-line">身高：<span id="viewHeight"></span></div>
-                        <div class="view-line">体重：<span id="viewWeight"></span></div>
-                        <div class="view-line">地区：<span id="viewArea"></span></div>
-                        <div class="view-line">关注我的人数：<span id="fansCount"></span></div>
-                        <div class="view-line">我关注的人数：<span id="followingCount"></span></div>
-                        <div style="margin-top:20px;border-top:1px solid var(--border-color);padding-top:16px;">
-                            <h4 style="color:var(--text-primary);font-weight:700;">🏆 我的成就</h4>
-                            <div id="achievementList" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;"></div>
-                        </div>
-                        <div style="margin-top:16px;border-top:1px solid var(--border-color);padding-top:16px;">
-                            <h4 style="color:var(--text-primary);font-weight:700;">🎨 头像框/挂件 <button class="btn-sm" id="openAvatarShopBtn">去装扮</button></h4>
-                            <div id="userEquippedItems" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;"></div>
-                        </div>
-                    </div>
-                    <div id="userEditMode" class="hidden">
-                        <h3>✏️ 编辑资料 <button class="btn-outline" style="float:right" id="closeEditProfile">取消</button></h3>
-                        <div class="info-row">
-                            <div class="info-item"><label>头像</label><br><img class="avatar" id="editAvatarPreview" style="width:80px;height:80px;cursor:pointer;border-radius:50%;border:1px solid var(--border-color);"><input type="file" accept="image/*" id="editAvatarFile" hidden></div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-item"><label>昵称</label><input id="editNick"></div>
-                            <div class="info-item"><label>邮箱</label><input id="editEmail"></div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-item"><label>标签</label><input id="editSign" placeholder="一句话介绍"></div>
-                            <div class="info-item"><label>星座</label><select id="editStar"><option value="">未填写</option><option>白羊座</option><option>金牛座</option><option>双子座</option><option>巨蟹座</option><option>狮子座</option><option>处女座</option><option>天秤座</option><option>天蝎座</option><option>射手座</option><option>摩羯座</option><option>水瓶座</option><option>双鱼座</option></select></div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-item"><label>生日</label><input type="date" id="editBirth"></div>
-                            <div class="info-item"><label>身高(cm)</label><input id="editHeight"></div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-item"><label>体重(kg)</label><input id="editWeight"></div>
-                            <div class="info-item"><label>地区</label><div class="area-select-row" id="areaBox"></div><input type="hidden" id="editAreaPath"></div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-item"><label>修改密码</label><input type="password" id="editPwd" placeholder="留空不修改"></div>
-                        </div>
-                        <button class="btn-main" style="width:auto;padding:8px 28px;" id="saveUserInfo">保存资料</button>
-                    </div>
-                    <div style="margin-top:20px;border-top:1px solid var(--border-color);padding-top:16px;">
-                        <h4 style="color:var(--text-primary);">📄 我的动态</h4>
-                        <div id="myDynamicList"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ===== 我的点赞/收藏 ===== -->
-            <div class="page-box hidden" id="page-myLike"><div class="panel"><h3>❤️ 我点赞的动态</h3><div id="myLikeList"></div></div></div>
-            <div class="page-box hidden" id="page-myCollect"><div class="panel"><h3>🔖 我收藏的动态</h3><div id="myCollectList"></div></div></div>
-
-            <!-- ===== 时间胶囊 ===== -->
-            <div class="page-box hidden" id="page-capsule">
-                <div class="panel">
-                    <h3>⏳ 时间胶囊 <button class="btn-sm" id="writeCapsuleBtn">✉️ 写一封信</button></h3>
-                    <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:16px;">写给未来的自己或同学，设置解锁日期，到时才能打开 💌</p>
-                    <div id="capsuleList"></div>
-                </div>
-            </div>
-
-            <!-- ===== 班级大事记 ===== -->
-            <div class="page-box hidden" id="page-timeline">
-                <div class="panel">
-                    <h3>📜 班级大事记 <button class="btn-sm" id="addTimelineBtn">➕ 添加事件</button></h3>
-                    <div id="timelineList"></div>
-                </div>
-            </div>
-
-            <!-- ===== 去向登记 ===== -->
-            <div class="page-box hidden" id="page-destinations">
-                <div class="panel">
-                    <h3>🗺️ 同学去向登记 <button class="btn-sm" id="addDestinationBtn">📝 登记我的去向</button></h3>
-                    <div id="destinationList"></div>
-                </div>
-            </div>
-
-            <!-- ===== 教师寄语 ===== -->
-            <div class="page-box hidden" id="page-teacher">
-                <div class="panel panel-teacher">
-                    <h3>🎓 毕业寄语 <span style="font-size:0.8rem;font-weight:normal;color:var(--text-secondary);">来自老师们的祝福</span></h3>
-                    <div id="teacherMessageList"></div>
-                    <div id="teacherMessageForm" style="display:none;margin-top:16px;">
-                        <textarea id="teacherMessageInput" rows="4" placeholder="写下你对全班同学的毕业寄语..." style="width:100%;padding:12px;border:1px solid var(--border-color);border-radius:var(--radius-sm);background:rgba(255,255,255,0.4);backdrop-filter:blur(8px);color:var(--text-primary);resize:vertical;"></textarea>
-                        <div style="margin-top:8px;display:flex;gap:8px;">
-                            <button class="btn-main" style="width:auto;padding:8px 28px;" id="sendTeacherMessageBtn">发布寄语</button>
-                            <span style="font-size:0.8rem;color:var(--text-light);align-self:center;">💡 教师可发布置顶寄语</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ===== 更新日志 ===== -->
-            <div class="page-box hidden" id="page-changelog">
-                <div class="panel">
-                    <h3>📋 更新日志</h3>
-                    <div id="changelogList"></div>
-                </div>
-            </div>
-
-            <!-- ===== 管理后台 ===== -->
-            <div class="page-box hidden" id="page-admin">
-                <div class="panel">
-                    <h3>🛡️ 管理后台</h3>
-                    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
-                        <button class="btn-sm admin-tab active" data-tab="dashboard">📊 概况</button>
-                        <button class="btn-sm admin-tab" data-tab="users">👤 用户</button>
-                        <button class="btn-sm admin-tab" data-tab="dynamics">📝 动态</button>
-                        <button class="btn-sm admin-tab" data-tab="comments">💬 评论</button>
-                        <button class="btn-sm admin-tab" data-tab="bans">🚫 禁言</button>
-                        <button class="btn-sm admin-tab" data-tab="levels">📈 等级</button>
-                        <button class="btn-sm admin-tab" data-tab="teachers">🎓 教师管理</button>
-                    </div>
-                    <div id="adminContent"></div>
-                </div>
-            </div>
-
-        </div><!-- /content -->
     </div><!-- /main-wrap -->
 
     <!-- ================================================================
-         底部导航（手机）
+         所有模态框
          ================================================================ -->
-    <div class="bottom-nav" id="bottomNav">
-        <button class="nav-item active" data-page="home"><i class="fa fa-home"></i><span>主页</span></button>
-        <button class="nav-item" data-page="dynamic"><i class="fa fa-rss"></i><span>动态</span></button>
-        <button class="nav-item" data-page="messages"><i class="fa fa-comments"></i><span>消息</span><span class="badge hidden" id="bottomMsgBadge">0</span></button>
-        <button class="nav-item" data-page="usercenter"><i class="fa fa-user"></i><span>我的</span></button>
-    </div>
-
-    <!-- ================================================================
-         设置弹窗
-         ================================================================ -->
-    <div class="settings-overlay" id="settingsOverlay">
-        <div class="settings-window">
-            <div class="settings-sidebar">
-                <div class="setting-nav-item active" data-tab="system"><i class="fa fa-desktop"></i> 系统</div>
-                <div class="setting-nav-item" data-tab="personal"><i class="fa fa-paint-brush"></i> 个性化</div>
-                <div class="setting-nav-item" data-tab="ai"><i class="fa fa-robot"></i> AI助手</div>
-                <div class="setting-nav-item" data-tab="cloud"><i class="fa fa-cloud"></i> 云配置</div>
-                <div class="setting-nav-item" data-tab="account"><i class="fa fa-user-circle"></i> 账户</div>
-                <div class="setting-nav-item" data-tab="data"><i class="fa fa-database"></i> 数据</div>
-                <div class="setting-nav-item" data-tab="security"><i class="fa fa-lock"></i> 设备管理</div>
-                <div class="setting-nav-item" data-tab="privacy"><i class="fa fa-shield"></i> 隐私</div>
-            </div>
-            <div class="settings-content" id="settingsContent"></div>
-            <div class="settings-close" id="settingsClose">&times;</div>
-        </div>
-    </div>
-
-    <!-- ================================================================
-         模态框
-         ================================================================ -->
-    <div class="modal-mask" id="cropMask"><div class="modal"><div class="cropper-box"><img id="cropImage"></div><div class="modal-btns"><button class="btn-cancel" id="cropCancel">取消</button><button class="btn-save" id="cropConfirm">确认裁剪</button></div></div></div>
-
     <!-- 创建班级 -->
     <div class="modal-mask" id="createClassModal">
         <div class="modal">
             <h3>创建班级</h3>
-            <div class="form-item"><label>班级名称</label><input id="createClassName" placeholder="如：2024届20班"></div>
-            <div class="form-item"><label>学校名称</label><input id="createSchoolName" placeholder="你的学校"></div>
+            <div class="form-item"><label>班级名称</label><input id="createClassName" placeholder="如：2024届20班" /></div>
+            <div class="form-item"><label>学校名称</label><input id="createSchoolName" placeholder="你的学校" /></div>
             <div class="form-item"><label>年级</label><select id="createGrade"><option value="初三">初三</option><option value="高一">高一</option><option value="高二">高二</option><option value="高三">高三</option><option value="大一">大一</option><option value="大二">大二</option><option value="大三">大三</option><option value="大四">大四</option></select></div>
-            <div class="form-item"><label>毕业年份</label><input type="number" id="createGraduationYear" placeholder="2024"></div>
-            <div class="form-item"><label><input type="checkbox" id="createIsPublic" checked> 公开班级（可被搜索加入）</label></div>
+            <div class="form-item"><label>毕业年份</label><input type="number" id="createGraduationYear" placeholder="2024" /></div>
+            <div class="form-item"><label><input type="checkbox" id="createIsPublic" checked /> 公开班级</label></div>
             <div class="modal-btns"><button class="btn-cancel" id="createClassCancel">取消</button><button class="btn-save" id="createClassConfirm">创建</button></div>
         </div>
     </div>
@@ -473,9 +188,9 @@
     <div class="modal-mask" id="joinClassModal">
         <div class="modal">
             <h3>🔍 加入班级</h3>
-            <div class="form-item"><label>搜索班级名称或编号</label><input id="joinClassSearch" placeholder="输入班级名称或编号..."></div>
+            <div class="form-item"><label>搜索班级</label><input id="joinClassSearch" placeholder="输入班级名称或编号..." /></div>
             <div id="joinClassResults" style="max-height:200px;overflow-y:auto;"></div>
-            <div class="form-item" style="margin-top:12px;"><label>或输入邀请码</label><input id="joinClassInviteCode" placeholder="输入邀请码"></div>
+            <div class="form-item" style="margin-top:12px;"><label>或输入邀请码</label><input id="joinClassInviteCode" placeholder="输入邀请码" /></div>
             <div class="modal-btns"><button class="btn-cancel" id="joinClassCancel">取消</button><button class="btn-save" id="joinClassConfirm">加入</button></div>
         </div>
     </div>
@@ -484,9 +199,9 @@
     <div class="modal-mask" id="writeCapsuleModal">
         <div class="modal">
             <h3>✉️ 写一封时间胶囊</h3>
-            <div class="form-item"><label>写给谁</label><input id="capsuleTo" placeholder="写给未来的自己 / 某位同学 / 全班"></div>
-            <div class="form-item"><label>内容</label><textarea id="capsuleContent" rows="5" style="width:100%;padding:10px;border:1px solid var(--border-color);border-radius:var(--radius-sm);background:rgba(255,255,255,0.4);color:var(--text-primary);resize:vertical;" placeholder="写下你想对TA说的话..."></textarea></div>
-            <div class="form-item"><label>解锁日期</label><input type="date" id="capsuleUnlockDate"></div>
+            <div class="form-item"><label>写给谁</label><input id="capsuleTo" placeholder="写给未来的自己 / 某位同学 / 全班" /></div>
+            <div class="form-item"><label>内容</label><textarea id="capsuleContent" rows="5" placeholder="写下你想对TA说的话..."></textarea></div>
+            <div class="form-item"><label>解锁日期</label><input type="date" id="capsuleUnlockDate" /></div>
             <div class="modal-btns"><button class="btn-cancel" id="writeCapsuleCancel">取消</button><button class="btn-save" id="writeCapsuleConfirm">封存 💌</button></div>
         </div>
     </div>
@@ -495,9 +210,9 @@
     <div class="modal-mask" id="addTimelineModal">
         <div class="modal">
             <h3>📜 添加大事记</h3>
-            <div class="form-item"><label>事件标题</label><input id="timelineTitle" placeholder="如：军训、运动会、成人礼"></div>
-            <div class="form-item"><label>描述</label><textarea id="timelineDesc" rows="3" style="width:100%;padding:10px;border:1px solid var(--border-color);border-radius:var(--radius-sm);background:rgba(255,255,255,0.4);color:var(--text-primary);resize:vertical;" placeholder="简单描述这件事..."></textarea></div>
-            <div class="form-item"><label>日期</label><input type="date" id="timelineDate"></div>
+            <div class="form-item"><label>事件标题</label><input id="timelineTitle" placeholder="如：军训、运动会" /></div>
+            <div class="form-item"><label>描述</label><textarea id="timelineDesc" rows="3" placeholder="简单描述..."></textarea></div>
+            <div class="form-item"><label>日期</label><input type="date" id="timelineDate" /></div>
             <div class="modal-btns"><button class="btn-cancel" id="addTimelineCancel">取消</button><button class="btn-save" id="addTimelineConfirm">添加</button></div>
         </div>
     </div>
@@ -506,46 +221,88 @@
     <div class="modal-mask" id="addDestinationModal">
         <div class="modal">
             <h3>📝 登记我的去向</h3>
-            <div class="form-item"><label>学校名称</label><input id="destSchool" placeholder="即将就读的高中/大学"></div>
-            <div class="form-item"><label>专业/班级（可选）</label><input id="destMajor" placeholder="专业或班级"></div>
-            <div class="form-item"><label>城市</label><input id="destCity" placeholder="所在城市"></div>
-            <div class="form-item"><label><input type="checkbox" id="destIsHighSchool" checked> 这是高中去向</label></div>
+            <div class="form-item"><label>学校名称</label><input id="destSchool" placeholder="即将就读的高中/大学" /></div>
+            <div class="form-item"><label>专业/班级</label><input id="destMajor" placeholder="专业或班级" /></div>
+            <div class="form-item"><label>城市</label><input id="destCity" placeholder="所在城市" /></div>
+            <div class="form-item"><label><input type="checkbox" id="destIsHighSchool" checked /> 高中去向</label></div>
             <div class="modal-btns"><button class="btn-cancel" id="addDestinationCancel">取消</button><button class="btn-save" id="addDestinationConfirm">保存</button></div>
         </div>
     </div>
 
-    <!-- 群聊相关 -->
-    <div class="modal-mask" id="createGroupModal"><div class="modal"><h3>创建群聊</h3><div class="form-item"><label>群名称</label><input id="groupNameInput" placeholder="输入群名称"></div><div class="form-item"><label>选择成员（勾选）</label><div id="memberCheckList" class="member-check-list" style="max-height:200px;overflow-y:auto;"></div></div><div class="modal-btns"><button class="btn-cancel" id="createGroupCancel">取消</button><button class="btn-save" id="createGroupConfirm">创建</button></div></div></div>
+    <!-- 发布通知 -->
+    <div class="modal-mask" id="newNoticeModal">
+        <div class="modal">
+            <h3>发布通知</h3>
+            <div class="form-item"><label>标题</label><input id="noticeTitleInput" /></div>
+            <div class="form-item"><label>内容</label><textarea id="noticeDescInput" rows="4"></textarea></div>
+            <div class="form-item"><label>截止日期</label><input type="datetime-local" id="noticeDeadlineInput" /></div>
+            <div class="modal-btns"><button class="btn-cancel" id="noticeModalCancel">取消</button><button class="btn-save" id="noticeModalConfirm">发布</button></div>
+        </div>
+    </div>
 
-    <div class="modal-mask" id="groupManageModal"><div class="modal" style="max-width:560px;"><h3>群管理 <span id="groupManageName" style="font-size:0.9rem;font-weight:normal;color:var(--text-secondary);"></span></h3><div style="margin:12px 0;display:flex;gap:8px;flex-wrap:wrap;"><button class="btn-sm" id="groupAddMemberBtn"><i class="fa fa-plus"></i> 添加成员</button> <button class="btn-sm" id="groupEditNameBtn"><i class="fa fa-pencil"></i> 修改群名</button> <button class="btn-sm" id="groupSetAnnounceBtn"><i class="fa fa-bullhorn"></i> 设置公告</button> <button class="btn-danger" id="groupDissolveBtn" style="font-size:0.8rem;padding:4px 14px;">解散群</button></div><div id="groupMemberListContainer"></div><div class="modal-btns"><button class="btn-cancel" id="groupManageClose">关闭</button></div></div></div>
+    <!-- 发起投票 -->
+    <div class="modal-mask" id="newPollModal">
+        <div class="modal">
+            <h3>发起投票</h3>
+            <div class="form-item"><label>问题</label><input id="pollQuestionInput" /></div>
+            <div class="form-item"><label>选项（每行一个）</label><textarea id="pollOptionsInput" rows="4" placeholder="选项1&#10;选项2&#10;选项3"></textarea></div>
+            <div class="form-item"><label><input type="checkbox" id="pollAnonymousCheck" /> 匿名投票</label></div>
+            <div class="modal-btns"><button class="btn-cancel" id="pollModalCancel">取消</button><button class="btn-save" id="pollModalConfirm">发起</button></div>
+        </div>
+    </div>
 
-    <div class="modal-mask" id="groupAddMemberModal"><div class="modal"><h3>添加成员</h3><div id="groupAddMemberList" class="member-check-list"></div><div class="modal-btns"><button class="btn-cancel" id="groupAddMemberCancel">取消</button><button class="btn-save" id="groupAddMemberConfirm">添加</button></div></div></div>
+    <!-- 添加班级事件 -->
+    <div class="modal-mask" id="addEventModal">
+        <div class="modal">
+            <h3>添加班级事件</h3>
+            <div class="form-item"><label>标题</label><input id="eventTitleInput" /></div>
+            <div class="form-item"><label>描述</label><textarea id="eventDescInput" rows="3"></textarea></div>
+            <div class="form-item"><label>日期</label><input type="date" id="eventDateInput" /></div>
+            <div class="form-item"><label>类型</label><select id="eventTypeInput"><option value="考试">考试</option><option value="活动">活动</option><option value="生日">生日</option><option value="提醒">提醒</option></select></div>
+            <div class="modal-btns"><button class="btn-cancel" id="eventModalCancel">取消</button><button class="btn-save" id="eventModalConfirm">添加</button></div>
+        </div>
+    </div>
 
-    <div class="modal-mask" id="groupEditNameModal"><div class="modal"><h3>修改群名称</h3><div class="form-item"><label>新群名</label><input id="groupEditNameInput"></div><div class="modal-btns"><button class="btn-cancel" id="groupEditNameCancel">取消</button><button class="btn-save" id="groupEditNameConfirm">保存</button></div></div></div>
+    <!-- 签到 -->
+    <div class="modal-mask" id="checkinModal">
+        <div class="modal" style="max-width:380px;"><div id="checkinContent"></div></div>
+    </div>
 
-    <div class="modal-mask" id="groupAnnounceModal"><div class="modal"><h3>群公告</h3><div class="form-item"><label>公告内容</label><textarea id="groupAnnounceInput" rows="4" style="width:100%;padding:8px;border:1px solid var(--border-color);border-radius:var(--radius-sm);background:rgba(255,255,255,0.4);"></textarea></div><div class="modal-btns"><button class="btn-cancel" id="groupAnnounceCancel">取消</button><button class="btn-save" id="groupAnnounceConfirm">发布</button></div></div></div>
+    <!-- 图片查看器 -->
+    <div class="modal-mask" id="imageViewer">
+        <div class="modal" style="max-width:90vw;max-height:90vh;padding:0;background:transparent;box-shadow:none;display:flex;align-items:center;justify-content:center;position:relative;">
+            <img id="imageViewerSrc" style="max-width:90vw;max-height:85vh;border-radius:var(--radius-sm);object-fit:contain;background:rgba(0,0,0,0.4);cursor:zoom-out;" />
+            <span style="position:absolute;top:10px;right:20px;font-size:30px;color:#fff;cursor:pointer;opacity:0.7;" id="imageViewerClose">&times;</span>
+        </div>
+    </div>
 
-    <!-- 通知、投票、日历 -->
-    <div class="modal-mask" id="newNoticeModal"><div class="modal"><h3>发布通知</h3><div class="form-item"><label>标题</label><input id="noticeTitleInput"></div><div class="form-item"><label>内容</label><textarea id="noticeDescInput" rows="4" style="width:100%;padding:8px;border:1px solid var(--border-color);border-radius:var(--radius-sm);background:rgba(255,255,255,0.4);"></textarea></div><div class="form-item"><label>截止日期（可选）</label><input type="datetime-local" id="noticeDeadlineInput"></div><div class="modal-btns"><button class="btn-cancel" id="noticeModalCancel">取消</button><button class="btn-save" id="noticeModalConfirm">发布</button></div></div></div>
-
-    <div class="modal-mask" id="newPollModal"><div class="modal"><h3>发起投票</h3><div class="form-item"><label>问题</label><input id="pollQuestionInput"></div><div class="form-item"><label>选项（每行一个）</label><textarea id="pollOptionsInput" rows="4" style="width:100%;padding:8px;border:1px solid var(--border-color);border-radius:var(--radius-sm);background:rgba(255,255,255,0.4);" placeholder="选项1&#10;选项2&#10;选项3"></textarea></div><div class="form-item"><label><input type="checkbox" id="pollAnonymousCheck"> 匿名投票</label></div><div class="modal-btns"><button class="btn-cancel" id="pollModalCancel">取消</button><button class="btn-save" id="pollModalConfirm">发起</button></div></div></div>
-
-    <div class="modal-mask" id="addEventModal"><div class="modal"><h3>添加班级事件</h3><div class="form-item"><label>标题</label><input id="eventTitleInput"></div><div class="form-item"><label>描述</label><textarea id="eventDescInput" rows="3" style="width:100%;padding:8px;border:1px solid var(--border-color);border-radius:var(--radius-sm);background:rgba(255,255,255,0.4);"></textarea></div><div class="form-item"><label>日期</label><input type="date" id="eventDateInput"></div><div class="form-item"><label>类型</label><select id="eventTypeInput"><option value="考试">考试</option><option value="活动">活动</option><option value="生日">生日</option><option value="提醒">提醒</option></select></div><div class="modal-btns"><button class="btn-cancel" id="eventModalCancel">取消</button><button class="btn-save" id="eventModalConfirm">添加</button></div></div></div>
-
-    <!-- 头像装扮 -->
-    <div class="modal-mask" id="avatarShopModal"><div class="modal" style="max-width:600px;"><h3>🎨 头像装扮</h3><div style="display:flex;gap:16px;margin:12px 0;flex-wrap:wrap;"><div style="flex:1;min-width:120px;text-align:center;border:1px solid var(--border-color);border-radius:var(--radius-sm);padding:12px;background:rgba(255,255,255,0.10);"><div class="avatar-wrapper" style="margin:0 auto;"><div class="avatar-frame" id="shopPreviewFrame" style="border:3px solid #ddd;"><img class="avatar" src="" style="width:64px;height:64px;"></div><div class="avatar-pendant top-right" id="shopPreviewPendant" style="display:none;font-size:18px;"></div></div><div style="font-size:0.8rem;margin-top:6px;color:var(--text-secondary);">预览</div></div><div style="flex:2;min-width:200px;"><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;"><button class="btn-sm" id="shopTabFrames">🖼️ 边框</button><button class="btn-sm" id="shopTabPendants">🎀 挂件</button></div><div id="shopItemsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;max-height:240px;overflow-y:auto;"></div></div></div><div class="modal-btns"><button class="btn-cancel" id="avatarShopClose">关闭</button></div></div></div>
-
-    <!-- 签到 & 图片查看 -->
-    <div class="modal-mask" id="checkinModal"><div class="modal" style="max-width:380px;"><div id="checkinContent"></div></div></div>
-
-    <div class="modal-mask" id="imageViewer"><div class="modal" style="max-width:90vw;max-height:90vh;padding:0;background:transparent;box-shadow:none;display:flex;align-items:center;justify-content:center;position:relative;"><img id="imageViewerSrc" style="max-width:90vw;max-height:85vh;border-radius:var(--radius-sm);object-fit:contain;background:rgba(0,0,0,0.4);cursor:zoom-out;"><span style="position:absolute;top:10px;right:20px;font-size:30px;color:#fff;cursor:pointer;opacity:0.7;" id="imageViewerClose">&times;</span></div></div>
-
-    <!-- 全局表情面板 -->
+    <!-- 表情面板 -->
     <div class="emoji-panel" id="globalEmojiPanel"></div>
 
-    <!-- ================================================================
-         引入外部脚本（按顺序加载）
-         ================================================================ -->
+    <!-- Logo 定义 -->
+    <svg style="display:none;" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <linearGradient id="bookGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#81C9FF" />
+                <stop offset="100%" stop-color="#A78BFA" />
+            </linearGradient>
+            <filter id="bookGlow"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <symbol id="logo-svg" viewBox="0 0 200 200">
+            <rect x="0" y="0" width="200" height="200" rx="40" fill="#0b0d10"/>
+            <rect x="10" y="10" width="180" height="180" rx="40" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.06)" stroke-width="2"/>
+            <path d="M 42 70 L 26 100 L 42 130" fill="none" stroke="#81C9FF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/>
+            <path d="M 62 78 Q 82 58 100 78 Q 118 58 138 78 L 138 122 Q 118 102 100 122 Q 82 102 62 122 Z" fill="rgba(255,255,255,0.06)" stroke="url(#bookGrad)" stroke-width="2.5" filter="url(#bookGlow)"/>
+            <line x1="100" y1="65" x2="100" y2="135" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
+            <circle cx="100" cy="100" r="22" fill="none" stroke="url(#bookGrad)" stroke-width="2.5"/>
+            <line x1="100" y1="100" x2="100" y2="84" stroke="url(#bookGrad)" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="100" y1="100" x2="114" y2="106" stroke="url(#bookGrad)" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="100" cy="100" r="3" fill="url(#bookGrad)"/>
+            <path d="M 158 70 L 174 100 L 158 130" fill="none" stroke="#81C9FF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/>
+            <circle cx="174" cy="168" r="5" fill="#A78BFA" opacity="0.5"/>
+        </symbol>
+    </svg>
+
     <script src="config.js"></script>
     <script src="app.js"></script>
 </body>
