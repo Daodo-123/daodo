@@ -58,9 +58,9 @@ body {
     position: fixed;
     top: -400px;
     left: -400px;
-    width: 800px;
-    height: 800px;
-    background: radial-gradient(circle, rgba(129,201,255,0.10) 0%, rgba(167,139,250,0.04) 40%, transparent 70%);
+    width: 800px;            /* 和官网一致 */
+    height: 800px;           /* 和官网一致 */
+    background: radial-gradient(circle, rgba(129, 201, 255, 0.12) 0%, rgba(167, 139, 250, 0.04) 40%, transparent 70%);
     border-radius: 50%;
     pointer-events: none;
     z-index: 0;
