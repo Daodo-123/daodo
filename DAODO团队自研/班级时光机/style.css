@@ -53,6 +53,9 @@ body {
     transition: background 0.4s ease, color 0.4s ease;
 }
 
+body.auth-active {
+    overflow: hidden;
+}
 /* ===== 背景光晕（跟随鼠标） ===== */
 .bg-glow {
     position: fixed;
