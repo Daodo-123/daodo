@@ -4,14 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Daodo · 独立开发</title>
-    
-    <!-- Favicon -->
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2381C9FF'/%3E%3Cstop offset='100%25' stop-color='%23A78BFA'/%3E%3C/linearGradient%3E%3Cfilter id='f'%3E%3CfeGaussianBlur stdDeviation='2' result='b'/%3E%3CfeMerge%3E%3CfeMergeNode in='b'/%3E%3CfeMergeNode in='SourceGraphic'/%3E%3C/feMerge%3E%3C/filter%3E%3C/defs%3E%3Crect x='0' y='0' width='200' height='200' rx='40' fill='%230b0d10'/%3E%3Crect x='10' y='10' width='180' height='180' rx='40' fill='rgba(255,255,255,0.04)' stroke='rgba(255,255,255,0.06)' stroke-width='2'/%3E%3Cpath d='M 45 72 L 28 100 L 45 128' fill='none' stroke='%2381C9FF' stroke-width='8' stroke-linecap='round' stroke-linejoin='round' opacity='0.9'/%3E%3Ctext x='100' y='138' font-family='Inter, system-ui, sans-serif' font-size='104' font-weight='800' fill='url(%23g)' filter='url(%23f)' text-anchor='middle' letter-spacing='-2'%3ED%3C/text%3E%3Cpath d='M 155 72 L 172 100 L 155 128' fill='none' stroke='%2381C9FF' stroke-width='8' stroke-linecap='round' stroke-linejoin='round' opacity='0.9'/%3E%3Ccircle cx='172' cy='165' r='6' fill='%23A78BFA' opacity='0.7'/%3E%3C/svg%3E">
 
-    <!-- Font Awesome -->
+    <!-- Favicon：方案B 极简信封 -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect x='0' y='0' width='200' height='200' rx='40' fill='%23080c16'/%3E%3Crect x='10' y='10' width='180' height='180' rx='40' fill='rgba(255,255,255,0.02)' stroke='rgba(255,255,255,0.03)' stroke-width='2'/%3E%3Cpath d='M 44 68 L 26 100 L 44 132' fill='none' stroke='%2381C9FF' stroke-width='6' stroke-linecap='round' stroke-linejoin='round' opacity='0.6'/%3E%3Crect x='68' y='72' width='64' height='52' rx='3' fill='rgba(255,255,255,0.02)' stroke='url(%23gB)' stroke-width='3' opacity='0.85'/%3E%3Cpath d='M 68 72 L 100 92 L 132 72' fill='none' stroke='url(%23gB)' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' opacity='0.6'/%3E%3Cpath d='M 156 68 L 174 100 L 156 132' fill='none' stroke='%2381C9FF' stroke-width='6' stroke-linecap='round' stroke-linejoin='round' opacity='0.6'/%3E%3Ccircle cx='174' cy='168' r='5' fill='%23A78BFA' opacity='0.3'/%3E%3C/svg%3E">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 
     <style>
+        /* ===== 全局重置 ===== */
         * {
             margin: 0;
             padding: 0;
@@ -25,7 +25,7 @@
             justify-content: center;
             font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
             background: #0b0d10;
-            background-image: 
+            background-image:
                 radial-gradient(ellipse at 20% 50%, rgba(10, 30, 60, 0.8) 0%, transparent 60%),
                 radial-gradient(ellipse at 80% 20%, rgba(60, 20, 80, 0.4) 0%, transparent 50%),
                 radial-gradient(ellipse at 50% 100%, rgba(0, 40, 70, 0.6) 0%, transparent 40%);
@@ -35,6 +35,7 @@
             overflow-x: hidden;
         }
 
+        /* ===== 背景粒子 ===== */
         #particles {
             position: fixed;
             top: 0;
@@ -52,19 +53,30 @@
             opacity: 0;
         }
         @keyframes floatParticle {
-            0% { transform: translateY(100vh) scale(0.5); opacity: 0; }
-            10% { opacity: 0.6; }
-            90% { opacity: 0.6; }
-            100% { transform: translateY(-10vh) scale(1.2); opacity: 0; }
+            0% {
+                transform: translateY(100vh) scale(0.5);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.6;
+            }
+            90% {
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(-10vh) scale(1.2);
+                opacity: 0;
+            }
         }
 
+        /* ===== 鼠标光晕 ===== */
         .glow {
             position: fixed;
             width: 800px;
             height: 800px;
             top: -400px;
             left: -400px;
-            background: radial-gradient(circle, rgba(100, 180, 255, 0.08) 0%, rgba(129, 201, 255, 0.02) 40%, transparent 70%);
+            background: radial-gradient(circle, rgba(100, 180, 255, 0.06) 0%, rgba(129, 201, 255, 0.02) 40%, transparent 70%);
             border-radius: 50%;
             pointer-events: none;
             z-index: 1;
@@ -72,6 +84,7 @@
             will-change: transform;
         }
 
+        /* ===== 主容器 ===== */
         .container {
             position: relative;
             z-index: 10;
@@ -89,27 +102,61 @@
             transform: translateY(30px);
         }
         @keyframes containerIn {
-            to { opacity: 1; transform: translateY(0); }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        .header, .hero, .features, .projects-title, .project-card, .footer {
+        /* ===== 入场动画 ===== */
+        .header,
+        .hero,
+        .features,
+        .projects-title,
+        .project-card,
+        .footer {
             opacity: 0;
             animation: fadeUp 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
         }
-        .header { animation-delay: 0.1s; }
-        .hero { animation-delay: 0.2s; }
-        .features { animation-delay: 0.3s; }
-        .projects-title { animation-delay: 0.4s; }
-        .project-card:nth-child(1) { animation-delay: 0.5s; }
-        .project-card:nth-child(2) { animation-delay: 0.6s; }
-        .project-card:nth-child(3) { animation-delay: 0.7s; }
-        .footer { animation-delay: 0.8s; }
-
+        .header {
+            animation-delay: 0.1s;
+        }
+        .hero {
+            animation-delay: 0.2s;
+        }
+        .features {
+            animation-delay: 0.3s;
+        }
+        .projects-title {
+            animation-delay: 0.4s;
+        }
+        .project-card:nth-child(1) {
+            animation-delay: 0.5s;
+        }
+        .project-card:nth-child(2) {
+            animation-delay: 0.6s;
+        }
+        .project-card:nth-child(3) {
+            animation-delay: 0.7s;
+        }
+        .project-card:nth-child(4) {
+            animation-delay: 0.8s;
+        }
+        .footer {
+            animation-delay: 0.9s;
+        }
         @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
+        /* ===== 头部 ===== */
         .header {
             display: flex;
             justify-content: space-between;
@@ -135,7 +182,7 @@
             transition: transform 0.3s ease;
         }
         .logo-icon:hover {
-            transform: rotate(-8deg) scale(1.05);
+            transform: rotate(-6deg) scale(1.05);
         }
         .logo-icon svg {
             width: 100%;
@@ -184,11 +231,21 @@
             animation: pulse-dot 2s infinite;
         }
         @keyframes pulse-dot {
-            0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.4; transform: scale(0.8); }
-            100% { opacity: 1; transform: scale(1); }
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.4;
+                transform: scale(0.8);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
 
+        /* ===== 英雄区 ===== */
         .hero {
             margin-bottom: 48px;
         }
@@ -207,8 +264,12 @@
             animation: shimmer 4s infinite alternate;
         }
         @keyframes shimmer {
-            0% { background-position: 0% 50%; }
-            100% { background-position: 100% 50%; }
+            0% {
+                background-position: 0% 50%;
+            }
+            100% {
+                background-position: 100% 50%;
+            }
         }
         .hero p {
             font-size: 1.2rem;
@@ -219,6 +280,7 @@
             letter-spacing: 0.2px;
         }
 
+        /* ===== 标签 ===== */
         .features {
             display: flex;
             flex-wrap: wrap;
@@ -252,6 +314,7 @@
             opacity: 1;
         }
 
+        /* ===== 项目展示 ===== */
         .projects-title {
             font-size: 14px;
             text-transform: uppercase;
@@ -262,7 +325,7 @@
         }
         .projects-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 16px;
             margin-bottom: 48px;
         }
@@ -277,7 +340,7 @@
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.06);
             border-radius: 24px;
-            padding: 24px 22px;
+            padding: 24px 20px;
             transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
             cursor: pointer;
             position: relative;
@@ -323,20 +386,20 @@
             display: block;
         }
         .project-card h3 {
-            font-size: 18px;
+            font-size: 17px;
             font-weight: 600;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             color: #fff;
         }
         .project-card p {
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.45);
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.4);
             line-height: 1.6;
         }
         .project-card .tag {
             display: inline-block;
-            margin-top: 12px;
-            font-size: 11px;
+            margin-top: 10px;
+            font-size: 10px;
             background: rgba(129, 201, 255, 0.1);
             color: #81C9FF;
             padding: 2px 12px;
@@ -349,6 +412,7 @@
             border-color: rgba(129, 201, 255, 0.2);
         }
 
+        /* ===== 底部 ===== */
         .footer {
             display: flex;
             flex-wrap: wrap;
@@ -368,8 +432,13 @@
             animation: heartbeat 1.8s infinite;
         }
         @keyframes heartbeat {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.2); }
+            0%,
+            100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.2);
+            }
         }
         .social-links {
             display: flex;
@@ -387,6 +456,7 @@
             transform: translateY(-4px) scale(1.1);
         }
 
+        /* ===== 响应式 ===== */
         @media (max-width: 640px) {
             .container {
                 padding: 32px 20px;
@@ -408,41 +478,50 @@
             .projects-grid {
                 grid-template-columns: 1fr;
             }
+            .project-card {
+                padding: 20px 16px;
+            }
         }
     </style>
 </head>
 <body>
 
+    <!-- 背景粒子 -->
     <div id="particles"></div>
+
+    <!-- 鼠标光晕 -->
     <div class="glow" id="glow"></div>
 
     <div class="container">
+
+        <!-- ===== 头部 ===== -->
         <div class="header">
             <div class="logo-group">
                 <div class="logo-icon">
                     <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
                         <defs>
-                            <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <linearGradient id="gB" x1="0%" y1="0%" x2="100%" y2="100%">
                                 <stop offset="0%" stop-color="#81C9FF" />
                                 <stop offset="100%" stop-color="#A78BFA" />
                             </linearGradient>
-                            <filter id="f"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
                         </defs>
-                        <rect x="10" y="10" width="180" height="180" rx="40" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.06)" stroke-width="2"/>
-                        <path d="M 45 72 L 28 100 L 45 128" fill="none" stroke="#81C9FF" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
-                        <text x="100" y="138" font-family="'Inter', system-ui, sans-serif" font-size="104" font-weight="800" fill="url(#g)" filter="url(#f)" text-anchor="middle" letter-spacing="-2">D</text>
-                        <path d="M 155 72 L 172 100 L 155 128" fill="none" stroke="#81C9FF" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
-                        <circle cx="172" cy="165" r="6" fill="#A78BFA" opacity="0.7"/>
+                        <rect x="10" y="10" width="180" height="180" rx="40" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.03)" stroke-width="2" />
+                        <path d="M 44 68 L 26 100 L 44 132" fill="none" stroke="#81C9FF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="0.6" />
+                        <rect x="68" y="72" width="64" height="52" rx="3" fill="rgba(255,255,255,0.02)" stroke="url(#gB)" stroke-width="3" opacity="0.85" />
+                        <path d="M 68 72 L 100 92 L 132 72" fill="none" stroke="url(#gB)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.6" />
+                        <path d="M 156 68 L 174 100 L 156 132" fill="none" stroke="#81C9FF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="0.6" />
+                        <circle cx="174" cy="168" r="5" fill="#A78BFA" opacity="0.3" />
                     </svg>
                 </div>
                 <span class="logo-text">Daodo<span class="dot">.</span></span>
             </div>
             <div class="status-badge">
                 <span class="status-dot"></span>
-                开发中 · 独立厂牌
+                独立开发 · 数字工坊
             </div>
         </div>
 
+        <!-- ===== 英雄区 ===== -->
         <div class="hero">
             <h1>
                 创造 · 极简 · <br class="hide-on-desktop" />
@@ -454,6 +533,7 @@
             </p>
         </div>
 
+        <!-- ===== 标签 ===== -->
         <div class="features">
             <span><i class="fas fa-code"></i> 全栈开发</span>
             <span><i class="fas fa-paint-brush"></i> 毛玻璃 UI</span>
@@ -461,106 +541,105 @@
             <span><i class="fas fa-cubes"></i> 单兵作战</span>
         </div>
 
+        <!-- ===== 项目展示 ===== -->
         <div class="projects-title"><i class="fas fa-folder-open" style="margin-right: 8px;"></i> 旗下项目</div>
         <div class="projects-grid">
 
-            <a href="DAODO团队自研/班级时光机/班级时光机.html" class="project-link">
+            <!-- 1. 未来来信局 -->
+            <a href="DAODO团队自研/未来来信局.html" class="project-link">
                 <div class="project-card">
                     <span class="icon">
                         <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                            <defs>
-                                <linearGradient id="bookGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stop-color="#81C9FF" />
-                                    <stop offset="100%" stop-color="#A78BFA" />
-                                </linearGradient>
-                                <filter id="bookGlow"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-                            </defs>
-                            <rect x="10" y="10" width="180" height="180" rx="40" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.06)" stroke-width="2"/>
-                            <path d="M 42 70 L 26 100 L 42 130" fill="none" stroke="#81C9FF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/>
-                            <path d="M 62 78 Q 82 58 100 78 Q 118 58 138 78 L 138 122 Q 118 102 100 122 Q 82 102 62 122 Z" fill="rgba(255,255,255,0.06)" stroke="url(#bookGrad)" stroke-width="2.5" filter="url(#bookGlow)"/>
-                            <line x1="100" y1="65" x2="100" y2="135" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
-                            <circle cx="100" cy="100" r="22" fill="none" stroke="url(#bookGrad)" stroke-width="2.5"/>
-                            <line x1="100" y1="100" x2="100" y2="84" stroke="url(#bookGrad)" stroke-width="2.5" stroke-linecap="round"/>
-                            <line x1="100" y1="100" x2="114" y2="106" stroke="url(#bookGrad)" stroke-width="2" stroke-linecap="round"/>
-                            <circle cx="100" cy="100" r="3" fill="url(#bookGrad)"/>
-                            <path d="M 158 70 L 174 100 L 158 130" fill="none" stroke="#81C9FF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/>
-                            <circle cx="174" cy="168" r="5" fill="#A78BFA" opacity="0.5"/>
+                            <rect x="10" y="10" width="180" height="180" rx="40" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.04)" stroke-width="1.5" />
+                            <rect x="68" y="72" width="64" height="52" rx="3" fill="none" stroke="url(#gB)" stroke-width="3" opacity="0.8" />
+                            <path d="M 68 72 L 100 92 L 132 72" fill="none" stroke="url(#gB)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.6" />
+                            <circle cx="100" cy="98" r="3" fill="#81C9FF" opacity="0.4" />
+                            <text x="100" y="155" font-family="'Inter', system-ui, sans-serif" font-size="16" font-weight="700" fill="#81C9FF" text-anchor="middle" opacity="0.5">✉️</text>
                         </svg>
                     </span>
-                    <h3>班级时光机</h3>
-                    <p>全功能班级社交平台，含动态、群聊、树洞、签到、等级系统及 AI 助手。</p>
-                    <span class="tag">v3.1.0 · 进行中</span>
+                    <h3>未来来信局</h3>
+                    <p>温柔陪伴型专注工具，每次值班都会收到一封来自未来的信。</p>
+                    <span class="tag">v1.0 · 已上线</span>
                 </div>
             </a>
 
+            <!-- 2. 记忆星球 -->
             <a href="DAODO团队自研/记忆星球.html" class="project-link">
                 <div class="project-card">
                     <span class="icon">
                         <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                            <defs>
-                                <linearGradient id="gb2" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stop-color="#64b5f6" />
-                                    <stop offset="100%" stop-color="#7c4dff" />
-                                </linearGradient>
-                            </defs>
-                            <rect x="10" y="10" width="180" height="180" rx="40" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.06)" stroke-width="2" />
-                            <path d="M 44 68 L 26 100 L 44 132" fill="none" stroke="#64b5f6" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.5" />
-                            <path d="M 156 68 L 174 100 L 156 132" fill="none" stroke="#64b5f6" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.5" />
-                            <circle cx="100" cy="100" r="46" fill="none" stroke="url(#gb2)" stroke-width="1.5" opacity="0.12" />
-                            <circle cx="100" cy="100" r="38" fill="none" stroke="url(#gb2)" stroke-width="2.5" opacity="0.35" />
-                            <circle cx="100" cy="100" r="28" fill="url(#gb2)" opacity="0.06" />
-                            <circle cx="100" cy="100" r="22" fill="none" stroke="url(#gb2)" stroke-width="1.5" opacity="0.25" />
-                            <circle cx="100" cy="100" r="8" fill="url(#gb2)" opacity="0.2" />
-                            <path d="M 100 54 A 38 38 0 0 1 136 90 A 38 38 0 0 0 100 62 Z" fill="rgba(255,255,255,0.04)" />
-                            <circle cx="174" cy="168" r="5" fill="#7c4dff" opacity="0.3" />
+                            <rect x="10" y="10" width="180" height="180" rx="40" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.04)" stroke-width="1.5" />
+                            <circle cx="100" cy="100" r="38" fill="none" stroke="#81C9FF" stroke-width="2.5" opacity="0.5" />
+                            <circle cx="100" cy="100" r="22" fill="none" stroke="#A78BFA" stroke-width="1.5" opacity="0.3" />
+                            <circle cx="100" cy="100" r="8" fill="#81C9FF" opacity="0.3" />
+                            <circle cx="174" cy="168" r="4" fill="#A78BFA" opacity="0.3" />
                         </svg>
                     </span>
                     <h3>记忆星球</h3>
-                    <p>将你的记忆化作一颗颗独特的星球，在宇宙中永恒闪耀。3D 交互、情绪颜色、时光轴。</p>
+                    <p>将你的记忆化作一颗颗独特的星球，在宇宙中永恒闪耀。</p>
                     <span class="tag">v5.1 · 已上线</span>
                 </div>
             </a>
 
+            <!-- 3. 倒计时器 -->
             <a href="DAODO团队自研/倒计时.html" class="project-link">
                 <div class="project-card">
                     <span class="icon">
                         <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                            <defs>
-                                <linearGradient id="clockGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stop-color="#81C9FF" />
-                                    <stop offset="100%" stop-color="#A78BFA" />
-                                </linearGradient>
-                            </defs>
-                            <rect x="10" y="10" width="180" height="180" rx="40" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.06)" stroke-width="2" />
-                            <circle cx="100" cy="100" r="44" fill="none" stroke="url(#clockGrad)" stroke-width="2.5" opacity="0.4" />
-                            <line x1="100" y1="100" x2="100" y2="70" stroke="url(#clockGrad)" stroke-width="3" stroke-linecap="round" opacity="0.6" />
-                            <line x1="100" y1="100" x2="120" y2="115" stroke="url(#clockGrad)" stroke-width="2" stroke-linecap="round" opacity="0.6" />
-                            <circle cx="100" cy="100" r="6" fill="url(#clockGrad)" opacity="0.4" />
-                            <text x="100" y="155" font-family="'Inter', system-ui, sans-serif" font-size="28" font-weight="700" fill="url(#clockGrad)" text-anchor="middle" opacity="0.6">⌛</text>
-                            <circle cx="174" cy="168" r="5" fill="#A78BFA" opacity="0.3" />
+                            <rect x="10" y="10" width="180" height="180" rx="40" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.04)" stroke-width="1.5" />
+                            <circle cx="100" cy="100" r="40" fill="none" stroke="#81C9FF" stroke-width="2.5" opacity="0.4" />
+                            <line x1="100" y1="100" x2="100" y2="68" stroke="#A78BFA" stroke-width="3" stroke-linecap="round" opacity="0.5" />
+                            <line x1="100" y1="100" x2="120" y2="115" stroke="#A78BFA" stroke-width="2" stroke-linecap="round" opacity="0.5" />
+                            <circle cx="100" cy="100" r="5" fill="#81C9FF" opacity="0.3" />
+                            <circle cx="174" cy="168" r="4" fill="#A78BFA" opacity="0.3" />
                         </svg>
                     </span>
                     <h3>倒计时器</h3>
-                    <p>通用倒计时工具，支持中考、高考、自定义目标。可保存数据，自带进度条。</p>
+                    <p>通用倒计时工具，支持中考、高考、自定义目标，可保存数据。</p>
                     <span class="tag">v2.0 · 已上线</span>
+                </div>
+            </a>
+
+            <!-- 4. 班级时光机 -->
+            <a href="DAODO团队自研/班级时光机.html" class="project-link">
+                <div class="project-card" style="opacity: 0.7;">
+                    <span class="icon">
+                        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="10" y="10" width="180" height="180" rx="40" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.04)" stroke-width="1.5" />
+                            <path d="M 60 90 Q 80 72 100 90 Q 120 72 140 90 L 140 120 Q 120 102 100 120 Q 80 102 60 120 Z" fill="none" stroke="#81C9FF" stroke-width="2.5" opacity="0.5" />
+                            <line x1="100" y1="78" x2="100" y2="132" stroke="#A78BFA" stroke-width="1.5" opacity="0.3" />
+                            <circle cx="100" cy="105" r="12" fill="none" stroke="#A78BFA" stroke-width="2" opacity="0.4" />
+                            <line x1="100" y1="105" x2="100" y2="97" stroke="#81C9FF" stroke-width="2" stroke-linecap="round" opacity="0.4" />
+                            <line x1="100" y1="105" x2="107" y2="109" stroke="#81C9FF" stroke-width="2" stroke-linecap="round" opacity="0.4" />
+                            <circle cx="174" cy="168" r="4" fill="#A78BFA" opacity="0.3" />
+                        </svg>
+                    </span>
+                    <h3>班级时光机</h3>
+                    <p>全功能班级社交平台，含动态、群聊、树洞、签到、等级系统及AI助手。</p>
+                    <span class="tag">v3.1.0 · 进行中</span>
                 </div>
             </a>
 
         </div>
 
+        <!-- ===== 底部 ===== -->
         <div class="footer">
             <div class="copy">
                 © 2026 Daodo · Made with <i class="fas fa-heart" style="color: #f472b6; font-size: 12px;"></i>
             </div>
             <div class="social-links">
                 <a href="#" title="GitHub" onclick="alert('GitHub 链接待补充'); return false;"><i class="fab fa-github"></i></a>
-                <a href="#" title="作品集" onclick="alert('你的 GitHub Pages 链接待补充'); return false;"><i class="fas fa-globe"></i></a>
+                <a href="#" title="作品集" onclick="alert('https://daodo-123.github.io/daodo/'); return false;"><i class="fas fa-globe"></i></a>
                 <a href="#" title="邮件" onclick="alert('联系邮箱待补充'); return false;"><i class="fas fa-envelope"></i></a>
             </div>
         </div>
+
     </div>
 
     <script>
+        // ============================================================
+        //  背景粒子
+        // ============================================================
         (function() {
             const container = document.getElementById('particles');
             const count = 40;
@@ -578,6 +657,9 @@
             }
         })();
 
+        // ============================================================
+        //  鼠标光晕
+        // ============================================================
         const glow = document.getElementById('glow');
         let targetX = window.innerWidth / 2;
         let targetY = window.innerHeight / 2;
@@ -597,6 +679,9 @@
         }
         smoothGlow();
 
+        // ============================================================
+        //  卡片 3D 倾斜
+        // ============================================================
         const cards = document.querySelectorAll('.project-card');
         cards.forEach(card => {
             card.addEventListener('mousemove', (e) => {
@@ -606,18 +691,20 @@
                 card.style.setProperty('--mouse-x', (x * 100 + 50) + '%');
                 card.style.setProperty('--mouse-y', (y * 100 + 50) + '%');
                 card.style.transform = `
-                    perspective(800px)
-                    rotateX(${-y * 6}deg)
-                    rotateY(${x * 6}deg)
-                    translateY(-6px)
-                `;
+                            perspective(800px)
+                            rotateX(${-y * 6}deg)
+                            rotateY(${x * 6}deg)
+                            translateY(-6px)
+                        `;
             });
             card.addEventListener('mouseleave', () => {
                 card.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg) translateY(0)';
             });
         });
 
-        console.log('Daodo 官网已升级 ✨ 点击项目卡片直接跳转！');
+        console.log('✉️ Daodo 官网已升级 — 极简信封新Logo');
+        console.log('📮 新增：未来来信局 项目卡片');
+        console.log('💡 点击项目卡片可直接跳转');
     </script>
 
 </body>
