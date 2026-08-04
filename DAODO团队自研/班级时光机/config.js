@@ -9,11 +9,6 @@ var CONFIG = {
     SUPABASE_ANON_KEY: 'sb_publishable_0TcgungxkhJpKIJf2bHdLA_X14JILIp'
 };
 
-// ---------- 站主账号 ----------
-var OWNER_EMAIL = 'zhanzhu@guanli.com';
-var OWNER_NICKNAME = '站主';
-var OWNER_PASSWORD = 'Fang7!Kai9@';
-
 // ---------- 敏感词过滤 ----------
 var SENSITIVE_WORDS = ['傻逼','SB','sb','fuck','Fuck','操','cao','妈的','尼玛','脑残','白痴','垃圾','废物','死全家','狗日','妈逼','贱人','婊子','畜生'];
 
