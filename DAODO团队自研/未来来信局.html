@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>未来来信局</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --bg: #0b0d10;
+    --glass: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --text: #e8edf5;
+    --text-dim: rgba(255, 255, 255, 0.5);
+    --text-muted: rgba(255, 255, 255, 0.25);
+    --radius: 20px;
+}
+
+body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    overflow-x: hidden;
+}
+
+/* 背景 */
+.bg-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(ellipse 600px 400px at 20% 20%, rgba(10, 30, 60, 0.8), transparent),
+        radial-gradient(ellipse 500px 500px at 80% 15%, rgba(60, 20, 80, 0.35), transparent),
+        radial-gradient(ellipse 700px 400px at 50% 90%, rgba(0, 40, 70, 0.5), transparent);
+}
+
+/* 毛玻璃卡片 */
+.glass {
+    background: var(--glass);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    padding: 32px 28px;
+    transition: all 0.3s;
+}
+
+/* 角色图片 */
+.character-img {
+    width: 160px;
+    height: auto;
+    display: block;
+    image-rendering: auto;
+    filter: drop-shadow(0 0 30px rgba(129, 201, 255, 0.08));
+    transition: all 0.4s ease;
+}
+
+.character-img:hover {
+    filter: drop-shadow(0 0 40px rgba(129, 201, 255, 0.15));
+}
+
+/* ===== 布局 ===== */
+.container {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 600px;
+}
+
+/* 顶部 */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.logo {
+    font-size: 20px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.logo .dot {
+    color: #64b5f6;
+}
+
+.switch-btn {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    color: var(--text-dim);
+    padding: 8px 16px;
+    border-radius: 40px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-family: inherit;
+}
+
+.switch-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text);
+}
+
+/* 角色展示区 */
+.hero {
+    text-align: center;
+    padding: 16px 0 12px;
+}
+
+.hero .character-img {
+    margin: 0 auto;
+}
+
+.hero .char-name {
+    font-size: 18px;
+    font-weight: 600;
+    margin-top: 12px;
+}
+
+.hero .char-title {
+    font-size: 13px;
+    color: var(--text-dim);
+}
+
+.hero .speech {
+    margin-top: 12px;
+    padding: 12px 20px;
+    background: var(--glass);
+    border-radius: 12px;
+    font-size: 14px;
+    color: var(--text-dim);
+    line-height: 1.6;
+    display: inline-block;
+    max-width: 80%;
+}
+
+/* 任务选择 */
+.section-label {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.task-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.task-btn {
+    padding: 14px;
+    border-radius: 12px;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    color: var(--text-dim);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-family: inherit;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.task-btn:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text);
+}
+
+.task-btn.active {
+    border-color: #81C9FF;
+    background: rgba(129, 201, 255, 0.08);
+    color: #fff;
+}
+
+/* 时长选择 */
+.time-options {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.time-btn {
+    padding: 10px 20px;
+    border-radius: 40px;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    color: var(--text-dim);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-family: inherit;
+}
+
+.time-btn:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text);
+}
+
+.time-btn.active {
+    border-color: #81C9FF;
+    background: rgba(129, 201, 255, 0.08);
+    color: #fff;
+}
+
+.custom-time {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.custom-time input {
+    width: 60px;
+    padding: 10px 12px;
+    border-radius: 40px;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    color: var(--text);
+    font-size: 14px;
+    outline: none;
+    text-align: center;
+    font-family: inherit;
+}
+
+.custom-time input:focus {
+    border-color: #81C9FF;
+}
+
+.custom-time span {
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+/* 按钮 */
+.btn {
+    padding: 12px 28px;
+    border-radius: 40px;
+    border: none;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #81C9FF, #A78BFA);
+    color: #0b0d10;
+    box-shadow: 0 4px 20px rgba(129, 201, 255, 0.15);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 30px rgba(129, 201, 255, 0.2);
+}
+
+.btn-ghost {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    color: var(--text-dim);
+}
+
+.btn-ghost:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text);
+}
+
+.btn-sm {
+    padding: 8px 18px;
+    font-size: 13px;
+}
+
+.btn-block {
+    width: 100%;
+    justify-content: center;
+}
+
+/* 动作按钮区 */
+.action-bar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 16px 0 20px;
+}
+
+.action-btn {
+    padding: 6px 14px;
+    border-radius: 40px;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    color: var(--text-muted);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-family: inherit;
+}
+
+.action-btn:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text);
+}
+
+/* 计时器 */
+.timer-display {
+    font-size: 56px;
+    font-weight: 700;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 2px;
+    margin: 8px 0;
+}
+
+.timer-ring-wrap {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    margin: 0 auto 12px;
+}
+
+.timer-ring {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.timer-ring-bg {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.06);
+    stroke-width: 6;
+}
+
+.timer-ring-fg {
+    fill: none;
+    stroke: url(#ringGrad);
+    stroke-width: 6;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.5s ease;
+}
+
+.timer-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.timer-center .digits {
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.timer-center .label {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 2px;
+}
+
+.timer-status {
+    text-align: center;
+    font-size: 14px;
+    color: var(--text-dim);
+    margin: 12px 0;
+}
+
+/* 来信弹窗 */
+.letter-popup {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(12px);
+    padding: 20px;
+}
+
+.letter-popup.show {
+    display: flex;
+}
+
+.letter-popup-card {
+    background: rgba(20, 22, 30, 0.95);
+    backdrop-filter: blur(30px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 32px 28px;
+    max-width: 380px;
+    width: 100%;
+    text-align: center;
+    animation: popIn 0.4s ease;
+}
+
+@keyframes popIn {
+    from {
+        transform: scale(0.85);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.letter-popup-card .popup-icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+}
+
+.letter-popup-card .popup-from {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+.letter-popup-card .popup-text {
+    font-size: 15px;
+    line-height: 1.8;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+}
+
+.letter-popup-card .popup-close {
+    color: var(--text-muted);
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.letter-popup-card .popup-close:hover {
+    color: var(--text);
+}
+
+/* 完成页 */
+.reveal-content {
+    display: none;
+    animation: fadeUp 0.5s ease;
+}
+
+.reveal-content.show {
+    display: block;
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.reveal-letter {
+    text-align: left;
+    line-height: 1.9;
+    font-size: 14px;
+    color: var(--text-dim);
+    padding: 24px;
+}
+
+.reveal-letter .greeting {
+    font-size: 16px;
+    color: var(--text);
+    margin-bottom: 12px;
+}
+
+.reveal-letter .sign {
+    text-align: right;
+    font-style: italic;
+    color: var(--text-muted);
+    margin-top: 12px;
+}
+
+/* 隐藏 */
+.hidden {
+    display: none !important;
+}
+
+/* 响应式 */
+@media (max-width: 480px) {
+    .glass {
+        padding: 20px 16px;
+    }
+    .timer-display {
+        font-size: 40px;
+    }
+    .timer-ring-wrap {
+        width: 160px;
+        height: 160px;
+    }
+    .timer-center .digits {
+        font-size: 28px;
+    }
+    .character-img {
+        width: 120px;
+    }
+    .task-grid {
+        grid-template-columns: 1fr;
+    }
+    .hero .speech {
+        max-width: 100%;
+        font-size: 13px;
+    }
+}
+</style>
+</head>
+<body>
+
+<div class="bg-layer"></div>
+
+<div class="container" id="app">
+
+    <!-- 顶栏 -->
+    <div class="header">
+        <div class="logo">📮 未来来信局<span class="dot">.</span></div>
+        <button class="switch-btn" id="switchCharBtn"><i class="fa-solid fa-arrows-rotate"></i> 切换陪伴人</button>
+    </div>
+
+    <!-- 主卡片 -->
+    <div class="glass" id="mainCard">
+
+        <!-- 角色展示 -->
+        <div class="hero" id="heroArea">
+            <img class="character-img" id="charImg" src="" alt="角色">
+            <div class="char-name" id="charName">小未</div>
+            <div class="char-title" id="charTitle">看板娘 · 温柔治愈系</div>
+            <div class="speech" id="charSpeech">你回来啦～今天也要加油哦 ♪</div>
+        </div>
+
+        <!-- 动作测试按钮（开发用，上线后可删） -->
+        <div class="action-bar" id="actionBar">
+            <button class="action-btn" data-action="stand">🧍 站立</button>
+            <button class="action-btn" data-action="smile">😊 微笑</button>
+            <button class="action-btn" data-action="wave">👋 挥手</button>
+            <button class="action-btn" data-action="letter">📮 递信</button>
+            <button class="action-btn" data-action="think">🤔 思考</button>
+            <button class="action-btn" data-action="sleep">😴 打盹</button>
+            <button class="action-btn" data-action="cheer">💪 加油</button>
+            <button class="action-btn" data-action="goodbye">👋 再见</button>
+        </div>
+
+        <!-- 任务选择 -->
+        <div id="setupArea">
+            <div class="section-label"><i class="fa-solid fa-list-check"></i> 选择任务类型</div>
+            <div class="task-grid" id="taskGrid">
+                <button class="task-btn" data-task="写作业"><i class="fa-solid fa-pen"></i> 写作业</button>
+                <button class="task-btn" data-task="背书"><i class="fa-solid fa-book"></i> 背书</button>
+                <button class="task-btn" data-task="开发"><i class="fa-solid fa-code"></i> 开发</button>
+                <button class="task-btn" data-task="阅读"><i class="fa-solid fa-book-open"></i> 阅读</button>
+            </div>
+
+            <div class="section-label"><i class="fa-solid fa-clock"></i> 选择时长</div>
+            <div class="time-options" id="timeOptions">
+                <button class="time-btn" data-time="15">15 分钟</button>
+                <button class="time-btn" data-time="25">25 分钟</button>
+                <button class="time-btn" data-time="45">45 分钟</button>
+                <div class="custom-time">
+                    <input type="number" id="customTime" min="1" max="180" placeholder="自定义">
+                    <span>分钟</span>
+                </div>
+            </div>
+
+            <button class="btn btn-primary btn-block" id="startBtn"><i class="fa-solid fa-play"></i> 开始值班</button>
+        </div>
+
+        <!-- 计时器区域 -->
+        <div id="timerArea" class="hidden">
+            <div class="timer-ring-wrap">
+                <svg class="timer-ring" viewBox="0 0 200 200">
+                    <defs>
+                        <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#81C9FF"/>
+                            <stop offset="100%" stop-color="#A78BFA"/>
+                        </linearGradient>
+                    </defs>
+                    <circle class="timer-ring-bg" cx="100" cy="100" r="90"/>
+                    <circle class="timer-ring-fg" id="ringFg" cx="100" cy="100" r="90"
+                    stroke-dasharray="565.49" stroke-dashoffset="0"/>
+                </svg>
+                <div class="timer-center">
+                    <div class="digits" id="timerDigits">25:00</div>
+                    <div class="label" id="timerTaskLabel">写作业</div>
+                </div>
+            </div>
+            <div class="timer-status" id="timerStatus">专注中...</div>
+            <div style="display:flex;gap:10px;justify-content:center;">
+                <button class="btn btn-ghost btn-sm" id="pauseBtn"><i class="fa-solid fa-pause"></i> 暂停</button>
+                <button class="btn btn-ghost btn-sm" id="abandonBtn"><i class="fa-solid fa-xmark"></i> 放弃</button>
+            </div>
+        </div>
+
+        <!-- 完成区域 -->
+        <div id="revealArea" class="hidden">
+            <div class="reveal-content show">
+                <div class="reveal-letter glass" id="revealLetter">
+                    <div class="greeting">📮 一封来自未来的信</div>
+                    <div id="letterBody">你完成了一次专注值班。继续加油！</div>
+                    <div class="sign" id="letterSign">—— 小未</div>
+                </div>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:16px;">
+                    <button class="btn btn-primary btn-sm" id="saveLetterBtn"><i class="fa-solid fa-heart"></i> 收藏</button>
+                    <button class="btn btn-ghost btn-sm" id="homeBtn"><i class="fa-solid fa-house"></i> 返回首页</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 页脚 -->
+    <div style="text-align:center;margin-top:16px;font-size:12px;color:var(--text-muted);">
+        每一次专注，都会收到一封来自未来的信
+    </div>
+
+</div>
+
+<!-- 来信弹窗 -->
+<div class="letter-popup" id="letterPopup">
+    <div class="letter-popup-card">
+        <div class="popup-icon">📮</div>
+        <div class="popup-from" id="popupFrom">来自小未的留言</div>
+        <div class="popup-text" id="popupText">你已经很棒了，继续加油！</div>
+        <div class="popup-close" id="popupClose">— 点击关闭 —</div>
+    </div>
+</div>
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<script>
+    // ================================================================
+    //  🎯 配置
+    // ================================================================
+
+    // 图片基础路径（根据你的实际仓库调整）
+    const IMAGE_BASE = 'https://daodo-123.github.io/daodo/DAODO团队自研/images/';
+
+    // 角色数据
+    const CHARACTERS = {
+        xw: {
+            name: '小未',
+            title: '看板娘 · 温柔治愈系',
+            speech: '你回来啦～今天也要加油哦 ♪',
+            images: {
+                stand: 'xw_stand.png',
+                smile: 'xw_smile.png',
+                wave: 'xw_wave.png',
+                letter: 'xw_letter.png',
+                think: 'xw_think.png',
+                sleep: 'xw_sleep.png',
+                cheer: 'xw_cheer.png',
+                goodbye: 'xw_goodbye.png'
+            }
+        },
+        al: {
+            name: '阿来',
+            title: '看板郎 · 安静陪伴系',
+            speech: '来了？开始吧。',
+            images: {
+                stand: 'al_stand.png',
+                smile: 'al_smile.png',
+                wave: 'al_wave.png',
+                letter: 'al_letter.png',
+                think: 'al_think.png',
+                sleep: 'al_sleep.png',
+                cheer: 'al_cheer.png',
+                goodbye: 'al_goodbye.png'
+            }
+        }
+    };
+
+    // 来信内容
+    const LETTERS = {
+        '写作业': '完成作业的你，真的很了不起。那些题目没有想象中那么难，对吧？未来的你，正在感谢现在这个没有放弃的自己。',
+        '背书': '背书的辛苦，未来的你都记得。那些反复背诵的段落，后来都变成了你的底气。你做到了！',
+        '开发': '又写完了一段代码？未来的你正在用现在写的代码改变世界。每一个 bug 都不会白修，你走的每一步都算数。',
+        '阅读': '那些看过的字句，都会变成你思想的一部分。未来的你，正在感谢现在这个愿意静下来阅读的自己。'
+    };
+
+    const POPUP_MESSAGES = {
+        xw: ['你已经很棒了，继续加油呀～', '我在未来等你哦，不着急 ♪', '专注的样子最帅了！', '每一秒都在变得更好 ✨'],
+        al: ['还在？不错，继续。', '你做得很好。', '别分心，我陪着你。', '坚持住。']
+    };
+
+    // ================================================================
+    //  🧠 状态
+    // ================================================================
+
+    let state = {
+        char: 'xw', // 'xw' | 'al'
+        action: 'stand',
+        task: null,
+        duration: 0,
+        remaining: 0,
+        timer: null,
+        paused: false,
+        popupTimer: null,
+        popupCount: 0,
+        isRunning: false
+    };
+
+    // ================================================================
+    //  🖼️ DOM 引用
+    // ================================================================
+
+    const charImg = document.getElementById('charImg');
+    const charName = document.getElementById('charName');
+    const charTitle = document.getElementById('charTitle');
+    const charSpeech = document.getElementById('charSpeech');
+    const switchBtn = document.getElementById('switchCharBtn');
+    const setupArea = document.getElementById('setupArea');
+    const timerArea = document.getElementById('timerArea');
+    const revealArea = document.getElementById('revealArea');
+    const startBtn = document.getElementById('startBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const abandonBtn = document.getElementById('abandonBtn');
+    const timerDigits = document.getElementById('timerDigits');
+    const timerTaskLabel = document.getElementById('timerTaskLabel');
+    const timerStatus = document.getElementById('timerStatus');
+    const ringFg = document.getElementById('ringFg');
+    const letterPopup = document.getElementById('letterPopup');
+    const popupFrom = document.getElementById('popupFrom');
+    const popupText = document.getElementById('popupText');
+    const popupClose = document.getElementById('popupClose');
+    const revealLetter = document.getElementById('revealLetter');
+    const letterBody = document.getElementById('letterBody');
+    const letterSign = document.getElementById('letterSign');
+    const saveLetterBtn = document.getElementById('saveLetterBtn');
+    const homeBtn = document.getElementById('homeBtn');
+    const customTime = document.getElementById('customTime');
+
+    // ================================================================
+    //  🎯 核心函数
+    // ================================================================
+
+    // 切换角色
+    function setChar(charKey) {
+        state.char = charKey;
+        const char = CHARACTERS[charKey];
+        charName.textContent = char.name;
+        charTitle.textContent = char.title;
+        charSpeech.textContent = char.speech;
+        setAction('stand');
+        // 保存偏好
+        localStorage.setItem('fl_char', charKey);
+    }
+
+    // 切换动作
+    function setAction(action) {
+        state.action = action;
+        const char = CHARACTERS[state.char];
+        const imgFile = char.images[action] || char.images.stand;
+        charImg.src = IMAGE_BASE + imgFile;
+        // 如果图片加载失败，显示占位
+        charImg.onerror = function() {
+            this.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%231a1a2e" width="200" height="200"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%23666" font-family="system-ui" font-size="16"%3E%F0%9F%92%AC%3C/text%3E%3C/svg%3E';
+        };
+    }
+
+    // 切换角色
+    function toggleChar() {
+        const next = state.char === 'xw' ? 'al' : 'xw';
+        setChar(next);
+        // 重置任务选择高亮
+        document.querySelectorAll('.task-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+        state.task = null;
+        state.duration = 0;
+    }
+
+    // ================================================================
+    //  📮 值班逻辑
+    // ================================================================
+
+    function startTimer() {
+        if (!state.task) {
+            toast('请先选择任务类型');
+            return;
+        }
+        if (!state.duration || state.duration <= 0) {
+            toast('请先选择时长');
+            return;
+        }
+
+        state.remaining = state.duration * 60;
+        state.paused = false;
+        state.isRunning = true;
+        state.popupCount = 0;
+
+        setupArea.classList.add('hidden');
+        timerArea.classList.remove('hidden');
+        revealArea.classList.add('hidden');
+
+        timerTaskLabel.textContent = state.task;
+        setAction('cheer');
+        updateTimerDisplay();
+        runTimer();
+        schedulePopup();
+
+        timerStatus.textContent = '专注中...';
+        pauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i> 暂停';
+    }
+
+    function runTimer() {
+        clearInterval(state.timer);
+        state.timer = setInterval(() => {
+            if (state.paused) return;
+            state.remaining--;
+            updateTimerDisplay();
+
+            // 随机切换表情
+            if (Math.random() < 0.03) {
+                const actions = ['smile', 'think', 'cheer'];
+                setAction(actions[Math.floor(Math.random() * actions.length)]);
+            }
+
+            if (state.remaining <= 0) {
+                clearInterval(state.timer);
+                clearInterval(state.popupTimer);
+                finishTimer();
+            }
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        const m = Math.floor(state.remaining / 60);
+        const s = state.remaining % 60;
+        timerDigits.textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+
+        const total = state.duration * 60;
+        const pct = (total - state.remaining) / total;
+        const circumference = 565.49;
+        ringFg.style.strokeDashoffset = circumference * (1 - pct);
+    }
+
+    function togglePause() {
+        state.paused = !state.paused;
+        pauseBtn.innerHTML = state.paused ? '<i class="fa-solid fa-play"></i> 继续' :
+            '<i class="fa-solid fa-pause"></i> 暂停';
+        timerStatus.textContent = state.paused ? '已暂停' : '专注中...';
+        setAction(state.paused ? 'sleep' : 'smile');
+    }
+
+    function abandonTimer() {
+        if (confirm('确定要放弃这次值班吗？')) {
+            clearInterval(state.timer);
+            clearInterval(state.popupTimer);
+            state.isRunning = false;
+            setAction('goodbye');
+            setupArea.classList.remove('hidden');
+            timerArea.classList.add('hidden');
+            revealArea.classList.add('hidden');
+            toast('已放弃本次值班');
+        }
+    }
+
+    function finishTimer() {
+        state.isRunning = false;
+        setAction('cheer');
+
+        // 生成信件
+        const char = CHARACTERS[state.char];
+        const letterText = LETTERS[state.task] || '你完成了一次专注值班。未来的你，正在感谢现在这个努力的自己。';
+        letterBody.textContent = letterText;
+        letterSign.textContent = '—— ' + char.name;
+
+        timerArea.classList.add('hidden');
+        revealArea.classList.remove('hidden');
+
+        // 显示弹窗
+        showPopup('📮 值班完成！', '你收到了一封来自未来的信 💌');
+
+        toast('🎉 值班完成！');
+    }
+
+    // ================================================================
+    //  📮 来信弹窗
+    // ================================================================
+
+    function schedulePopup() {
+        const total = state.duration * 60;
+        const interval = Math.floor(total / 3);
+        let count = 0;
+
+        clearInterval(state.popupTimer);
+        state.popupTimer = setInterval(() => {
+            if (state.paused || state.remaining <= 0 || !state.isRunning) return;
+            count++;
+            if (count > 2) { clearInterval(state.popupTimer); return; }
+
+            const msgs = POPUP_MESSAGES[state.char] || POPUP_MESSAGES.xw;
+            const msg = msgs[Math.floor(Math.random() * msgs.length)];
+            const char = CHARACTERS[state.char];
+            setAction('letter');
+            showPopup('📮 来信', msg);
+            setTimeout(() => setAction('smile'), 500);
+        }, interval * 1000);
+    }
+
+    function showPopup(title, msg) {
+        popupFrom.textContent = title;
+        popupText.textContent = msg;
+        letterPopup.classList.add('show');
+        setTimeout(() => {
+            letterPopup.classList.remove('show');
+        }, 4000);
+    }
+
+    popupClose.addEventListener('click', () => {
+        letterPopup.classList.remove('show');
+    });
+    letterPopup.addEventListener('click', (e) => {
+        if (e.target === letterPopup) letterPopup.classList.remove('show');
+    });
+
+    // ================================================================
+    //  💾 收藏功能
+    // ================================================================
+
+    saveLetterBtn.addEventListener('click', () => {
+        const letters = JSON.parse(localStorage.getItem('fl_letters') || '[]');
+        letters.push({
+            char: state.char,
+            task: state.task,
+            duration: state.duration,
+            date: new Date().toISOString(),
+            text: letterBody.textContent
+        });
+        localStorage.setItem('fl_letters', JSON.stringify(letters));
+        toast('💌 已收藏这封信');
+    });
+
+    homeBtn.addEventListener('click', () => {
+        setupArea.classList.remove('hidden');
+        revealArea.classList.add('hidden');
+        timerArea.classList.add('hidden');
+        setAction('stand');
+        state.isRunning = false;
+        clearInterval(state.timer);
+        clearInterval(state.popupTimer);
+    });
+
+    // ================================================================
+    //  📋 任务选择
+    // ================================================================
+
+    document.querySelectorAll('.task-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.task-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            state.task = this.dataset.task;
+            setAction('smile');
+        });
+    });
+
+    document.querySelectorAll('.time-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            customTime.value = '';
+            state.duration = parseInt(this.dataset.time);
+        });
+    });
+
+    customTime.addEventListener('input', function() {
+        const v = parseInt(this.value);
+        if (v > 0) {
+            document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+            state.duration = v;
+        }
+    });
+
+    // ================================================================
+    //  🎬 动作测试按钮
+    // ================================================================
+
+    document.querySelectorAll('.action-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const action = this.dataset.action;
+            setAction(action);
+        });
+    });
+
+    // ================================================================
+    //  🔄 切换角色
+    // ================================================================
+
+    switchBtn.addEventListener('click', toggleChar);
+
+    // ================================================================
+    //  🚀 启动
+    // ================================================================
+
+    // 初始化
+    function init() {
+        const saved = localStorage.getItem('fl_char');
+        if (saved && CHARACTERS[saved]) {
+            setChar(saved);
+        } else {
+            setChar('xw');
+        }
+    }
+
+    // Toast 提示
+    function toast(msg) {
+        const t = document.getElementById('toast');
+        if (!t) {
+            const div = document.createElement('div');
+            div.id = 'toast';
+            div.style.cssText =
+                'position:fixed;bottom:40px;left:50%;transform:translateX(-50%);background:rgba(20,22,30,.9);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:12px 24px;font-size:14px;color:#e8edf5;z-index:200;opacity:0;transition:all .3s ease;pointer-events:none';
+            document.body.appendChild(div);
+        }
+        const el = document.getElementById('toast');
+        el.textContent = msg;
+        el.style.opacity = '1';
+        el.style.transform = 'translateX(-50%) translateY(0)';
+        clearTimeout(el._timer);
+        el._timer = setTimeout(() => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateX(-50%) translateY(20px)';
+        }, 2500);
+    }
+
+    // 快捷键：切换角色
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Tab' && !e.shiftKey) {
+            e.preventDefault();
+            toggleChar();
+        }
+    });
+
+    // 开始按钮
+    startBtn.addEventListener('click', startTimer);
+
+    // 暂停按钮
+    pauseBtn.addEventListener('click', togglePause);
+
+    // 放弃按钮
+    abandonBtn.addEventListener('click', abandonTimer);
+
+    init();
+    console.log('📮 未来来信局已加载');
+    console.log('💡 按 Tab 键切换角色');
+    console.log('🖼️ 图片路径:', IMAGE_BASE);
+</script>
+
+</body>
+</html>
