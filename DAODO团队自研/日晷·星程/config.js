@@ -4,7 +4,20 @@
 // Supabase 配置（请替换成你自己的值）
 // ============================================================
 export const SUPABASE_URL = 'https://agpznniqfxdeudwvimbb.supabase.co';
-export const SUPABASE_ANON_KEY = '你的anon key';
+export const SUPABASE_ANON_KEY = 'sb_publishable_0TcgungxkhJpKIJf2bHdLA_X14JILIp';
+
+// ============================================================
+// 初始化 Supabase 客户端（加在这下面）
+// ============================================================
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/module/index.js';
+
+export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: {
+        persistSession: true,
+        storage: localStorage,
+        storageKey: 'sundial-auth'
+    }
+});
 
 // ============================================================
 // 工具函数
