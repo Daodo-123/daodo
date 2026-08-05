@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+    <title>日晷·星程 · 星辰计划</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- 自定义样式 -->
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <!-- 星空背景 Canvas -->
+    <canvas id="starfield"></canvas>
+
+    <!-- 鼠标光晕 -->
+    <div id="glow"></div>
+
+    <!-- 登录/注册遮罩 -->
+    <div id="authOverlay" class="auth-overlay">
+        <div class="auth-box">
+            <h2 id="authTitle">🌙 日晷·星程</h2>
+            <input type="email" id="authEmail" placeholder="邮箱地址" />
+            <input type="password" id="authPassword" placeholder="密码" />
+            <button id="authSubmitBtn">登 录</button>
+            <div class="auth-switch">
+                还没有账号？<span id="authSwitch">注册</span>
+            </div>
+            <div id="authError" class="auth-error"></div>
+            <div class="reset-pwd">
+                <span id="resetPwdLink">忘记密码？</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 主应用 ===== -->
+    <div id="mainApp" class="app hidden">
+        <!-- 顶部栏 -->
+        <header class="header">
+            <div class="header-left">
+                <span class="day" id="dateDisplay"></span>
+                <span class="weekday" id="weekdayDisplay"></span>
+                <span class="sub" id="dayCount"></span>
+            </div>
+            <div class="header-right">
+                <div class="progress-wrapper">
+                    <div class="ring-container">
+                        <svg viewBox="0 0 56 56">
+                            <circle class="bg-circle" cx="28" cy="28" r="22" />
+                            <circle class="progress-circle" id="progressCircle" cx="28" cy="28" r="22" />
+                        </svg>
+                        <div class="progress-text" id="progressText">0%</div>
+                    </div>
+                    <div class="stats">
+                        <span><i class="fas fa-check-circle"></i> <span id="doneCount">0</span>/<span id="totalCount">0</span></span>
+                        <span><i class="fas fa-hourglass-half"></i> <span id="focusCount">0</span>min</span>
+                    </div>
+                </div>
+                <button class="icon-btn" id="companionBtn"><i class="fas fa-star"></i> 星伴</button>
+                <button class="icon-btn" id="statsBtn"><i class="fas fa-chart-simple"></i></button>
+                <button class="icon-btn" id="settingsBtn"><i class="fas fa-palette"></i></button>
+                <div class="user-area" id="userArea">
+                    <div class="avatar" id="userAvatar">U</div>
+                    <span class="username" id="userDisplayName">用户</span>
+                </div>
+                <button class="icon-btn logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i></button>
+            </div>
+        </header>
+
+        <!-- 主体网格 -->
+        <div class="main-grid">
+            <!-- 左栏：待办 -->
+            <section class="todo-panel">
+                <div class="panel-title">
+                    <span><i class="fas fa-list-ul"></i> 今日星程</span>
+                    <button class="clear-btn" id="clearDoneBtn"><i class="fas fa-trash-alt"></i> 清除已完成</button>
+                </div>
+                <div class="add-todo">
+                    <input type="text" id="todoInput" placeholder="写下一件重要的事…" maxlength="120" />
+                    <select id="prioritySelect">
+                        <option value="high">🔥 紧急</option>
+                        <option value="medium" selected>💡 重要</option>
+                        <option value="low">📌 日常</option>
+                    </select>
+                    <select id="repeatSelect">
+                        <option value="none">不重复</option>
+                        <option value="daily">每日</option>
+                        <option value="weekly">每周</option>
+                    </select>
+                    <input type="datetime-local" id="deadlineInput" class="deadline-input" />
+                    <button id="addTodoBtn"><i class="fas fa-plus"></i> 添加</button>
+                </div>
+                <ul class="todo-list" id="todoList">
+                    <li class="empty-tip"><i class="fas fa-star"></i> 今天还没有计划<br /><span style="font-size:0.8rem;">添加你的第一颗星星吧</span></li>
+                </ul>
+            </section>
+
+            <!-- 右栏 -->
+            <aside class="right-panel">
+                <!-- 心流计时（含观星者模式选择） -->
+                <div class="card" id="timerCard">
+                    <div class="timer-header">
+                        <span><i class="fas fa-clock"></i> 心流计时</span>
+                        <div style="display:flex; align-items:center; gap:4px;">
+                            <span id="timerTaskName" class="timer-task-name">未关联</span>
+                            <button class="popout-btn" id="popoutBtn"><i class="fas fa-window-restore"></i></button>
+                        </div>
+                    </div>
+                    <div class="timer-display" id="timerDisplay">25:00</div>
+                    <div class="timer-duration-set">
+                        <label>专注</label>
+                        <input type="number" id="focusDuration" value="25" min="1" max="120" step="1" />
+                        <span>min</span>
+                        <label style="margin-left:8px;">休息</label>
+                        <input type="number" id="breakDuration" value="5" min="1" max="60" step="1" />
+                        <span>min</span>
+                    </div>
+                    <div class="timer-loop-set">
+                        <label><input type="checkbox" id="loopEnable" /> 循环</label>
+                        <label>次数 <input type="number" id="loopCount" value="3" min="1" max="10" /></label>
+                        <span id="loopProgress" class="loop-progress">第 0/0 轮</span>
+                    </div>
+                    <!-- 观星者模式选择 -->
+                    <div class="watcher-mode">
+                        <span><i class="fas fa-eye"></i> 观星者模式</span>
+                        <select id="watcherMode">
+                            <option value="free">✨ 自由</option>
+                            <option value="mild" selected>🌙 轻度守望</option>
+                            <option value="strict">⭐ 重度守望</option>
+                            <option value="mutual">🔥 星伴互守</option>
+                        </select>
+                    </div>
+                    <div class="timer-controls">
+                        <button id="timerStartBtn" class="primary-btn"><i class="fas fa-play"></i> 开始</button>
+                        <button id="timerPauseBtn"><i class="fas fa-pause"></i> 暂停</button>
+                        <button id="timerResetBtn" class="danger-btn"><i class="fas fa-redo"></i> 重置</button>
+                    </div>
+                    <div class="timer-status" id="timerStatus"><i class="fas fa-info-circle"></i> 就绪</div>
+                    <div class="timer-sound-select">
+                        <i class="fas fa-volume-up"></i> 音效
+                        <select id="soundSelect">
+                            <option value="bell">🔔 铃</option>
+                            <option value="ding">🎵 叮</option>
+                            <option value="chime">🎐 风铃</option>
+                            <option value="none">🔇 无</option>
+                        </select>
+                    </div>
+                    <!-- 观星者视觉反馈区 -->
+                    <div id="watcherFeedback" class="watcher-feedback">
+                        <span class="watcher-icon">🌟</span>
+                        <span class="watcher-message">我在看着你哦</span>
+                    </div>
+                </div>
+
+                <!-- 音乐陪伴 -->
+                <div class="card">
+                    <div class="music-header">
+                        <i class="fas fa-music"></i> 音乐陪伴
+                        <span style="margin-left:auto; font-size:0.7rem; color:var(--text-muted);">上传音乐</span>
+                    </div>
+                    <audio id="bgMusic"></audio>
+                    <div class="music-controls">
+                        <button id="musicPlayBtn" class="play-btn"><i class="fas fa-play"></i> <span id="musicPlayText">播放</span></button>
+                        <button id="musicLoopBtn"><i class="fas fa-repeat"></i> <span id="loopStatus">关</span></button>
+                    </div>
+                    <div class="music-file-upload">
+                        <input type="file" id="musicFileInput" accept="audio/*" />
+                    </div>
+                    <div class="music-status">
+                        <span class="track-name" id="trackName">未选择</span>
+                        <span id="musicState" style="color:var(--text-muted);">请上传</span>
+                    </div>
+                </div>
+
+                <!-- 今日小结 -->
+                <div class="card summary-card">
+                    <div style="display:flex; align-items:center; gap:8px; color:var(--text-secondary); font-size:0.85rem; margin-bottom:8px;">
+                        <i class="fas fa-pen-fancy"></i> 今日小结
+                    </div>
+                    <textarea id="summaryInput" placeholder="今天过得怎么样？写下一句话…"></textarea>
+                    <div class="summary-actions">
+                        <button id="saveSummaryBtn" class="save-summary"><i class="fas fa-save"></i> 保存</button>
+                        <button id="clearSummaryBtn"><i class="fas fa-undo"></i> 清除</button>
+                    </div>
+                    <div class="saved-summary" id="savedSummary"></div>
+                </div>
+            </aside>
+        </div>
+
+        <!-- 底部工具 -->
+        <div class="footer-tools">
+            <button id="exportDataBtn"><i class="fas fa-download"></i> 导出数据</button>
+            <button id="importDataBtn"><i class="fas fa-upload"></i> 导入数据</button>
+            <input type="file" id="importFileInput" accept=".json" style="display:none;" />
+        </div>
+    </div>
+
+    <!-- ===== 模态框：星伴 ===== -->
+    <div class="modal-overlay" id="companionModal">
+        <div class="modal-box">
+            <h2>⭐ 星伴 <button class="close-modal" id="companionClose">&times;</button></h2>
+            <div class="companion-list-modal" id="companionListModal">
+                <div style="color:var(--text-muted);text-align:center;padding:12px 0;">暂无星伴</div>
+            </div>
+            <div class="companion-add-modal">
+                <input type="text" id="companionNameInput" placeholder="昵称" />
+                <input type="text" id="companionCodeInput" placeholder="分享码 (如 #ABC123)" />
+                <button id="addCompanionBtn"><i class="fas fa-user-plus"></i> 添加</button>
+            </div>
+            <div class="my-share-code">
+                我的分享码：<span id="myShareCode">#XXXXXX</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 模态框：统计 ===== -->
+    <div class="modal-overlay" id="statsModal">
+        <div class="modal-box">
+            <h2>📊 数据统计 <button class="close-modal" id="statsClose">&times;</button></h2>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+                <div><span style="color:var(--text-muted);">本周完成</span> <span id="weekDone" style="font-weight:bold;font-size:1.2rem;">0</span></div>
+                <div><span style="color:var(--text-muted);">本周专注</span> <span id="weekFocus" style="font-weight:bold;font-size:1.2rem;">0</span> min</div>
+            </div>
+            <div class="chart-container"><canvas id="statsChart"></canvas></div>
+            <div style="margin-top:10px;font-size:0.75rem;color:var(--text-muted);">近7天完成趋势</div>
+        </div>
+    </div>
+
+    <!-- ===== 模态框：个人中心 ===== -->
+    <div class="modal-overlay" id="profileModal">
+        <div class="modal-box">
+            <h2>👤 个人中心 <button class="close-modal" id="profileClose">&times;</button></h2>
+            <div class="profile-row">
+                <div class="big-avatar" id="profileAvatar">U</div>
+                <div class="info">
+                    <label>昵称</label>
+                    <input type="text" id="profileNickname" placeholder="输入新昵称" />
+                </div>
+            </div>
+            <div style="margin:12px 0;">
+                <label style="color:var(--text-muted);font-size:0.8rem;">修改密码</label>
+                <input type="password" id="profileNewPassword" placeholder="新密码（留空则不修改）" style="width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border-color);border-radius:30px;padding:8px 14px;color:var(--text-primary);outline:none;margin-top:4px;" />
+            </div>
+            <button id="profileSaveBtn" style="background:linear-gradient(135deg,var(--accent-blue),var(--accent-purple));border:none;border-radius:30px;padding:8px 20px;color:#fff;font-weight:600;cursor:pointer;width:100%;">保存修改</button>
+        </div>
+    </div>
+
+    <!-- ===== 模态框：主题设置 ===== -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal-box">
+            <h2>🎨 主题设置 <button class="close-modal" id="settingsClose">&times;</button></h2>
+            <div class="theme-options">
+                <button data-theme="dark" class="active-theme">🌙 深空</button>
+                <button data-theme="light">☀️ 晨光</button>
+                <button data-theme="dawn">🌅 晨曦</button>
+                <button data-theme="aurora">🌌 极光</button>
+                <button data-theme="custom">🎨 自定义</button>
+            </div>
+            <div id="customThemePanel" style="display:none; margin-top:12px;">
+                <div class="custom-theme-row">
+                    <label>主色 <input type="color" id="customPrimary" value="#6c8cff" /></label>
+                    <label>背景 <input type="color" id="customBg" value="#0b0a1a" /></label>
+                    <label>文字 <input type="color" id="customText" value="#f0edff" /></label>
+                </div>
+                <button id="applyCustomTheme" style="background:var(--accent-blue);border:none;border-radius:30px;padding:6px 20px;color:#fff;cursor:pointer;">应用自定义</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 迷你窗口（独立） ===== -->
+    <div class="mini-app hidden" id="miniApp">
+        <div class="mini-time" id="miniTime">25:00</div>
+        <div class="mini-controls">
+            <button class="primary-btn" id="miniStartBtn"><i class="fas fa-play"></i> 开始</button>
+            <button id="miniPauseBtn"><i class="fas fa-pause"></i> 暂停</button>
+            <button class="danger-btn" id="miniResetBtn"><i class="fas fa-redo"></i> 重置</button>
+        </div>
+        <div class="mini-status" id="miniStatus">就绪</div>
+        <button class="mini-return" id="miniReturnBtn"><i class="fas fa-arrow-left"></i> 返回主窗口</button>
+    </div>
+
+    <!-- 主 JavaScript -->
+    <script src="app.js" type="module"></script>
+</body>
+</html>
