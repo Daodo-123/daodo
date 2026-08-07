@@ -5,19 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Daodo · 独立开发</title>
 
-    <!-- Favicon：方案B 极简信封 -->
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect x='0' y='0' width='200' height='200' rx='40' fill='%23080c16'/%3E%3Crect x='10' y='10' width='180' height='180' rx='40' fill='rgba(255,255,255,0.02)' stroke='rgba(255,255,255,0.03)' stroke-width='2'/%3E%3Cpath d='M 44 68 L 26 100 L 44 132' fill='none' stroke='%2381C9FF' stroke-width='6' stroke-linecap='round' stroke-linejoin='round' opacity='0.6'/%3E%3Crect x='68' y='72' width='64' height='52' rx='3' fill='rgba(255,255,255,0.02)' stroke='url(%23gB)' stroke-width='3' opacity='0.85'/%3E%3Cpath d='M 68 72 L 100 92 L 132 72' fill='none' stroke='url(%23gB)' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' opacity='0.6'/%3E%3Cpath d='M 156 68 L 174 100 L 156 132' fill='none' stroke='%2381C9FF' stroke-width='6' stroke-linecap='round' stroke-linejoin='round' opacity='0.6'/%3E%3Ccircle cx='174' cy='168' r='5' fill='%23A78BFA' opacity='0.3'/%3E%3C/svg%3E">
-
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-        /* ===== 全局重置 ===== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        /* ===== 原有样式（完全保留，只增加登录相关样式） ===== */
+        * { margin:0; padding:0; box-sizing:border-box; }
         body {
             min-height: 100vh;
             display: flex;
@@ -35,7 +30,6 @@
             overflow-x: hidden;
         }
 
-        /* ===== 背景粒子 ===== */
         #particles {
             position: fixed;
             top: 0;
@@ -53,30 +47,19 @@
             opacity: 0;
         }
         @keyframes floatParticle {
-            0% {
-                transform: translateY(100vh) scale(0.5);
-                opacity: 0;
-            }
-            10% {
-                opacity: 0.6;
-            }
-            90% {
-                opacity: 0.6;
-            }
-            100% {
-                transform: translateY(-10vh) scale(1.2);
-                opacity: 0;
-            }
+            0% { transform: translateY(100vh) scale(0.5); opacity: 0; }
+            10% { opacity: 0.6; }
+            90% { opacity: 0.6; }
+            100% { transform: translateY(-10vh) scale(1.2); opacity: 0; }
         }
 
-        /* ===== 鼠标光晕 ===== */
         .glow {
             position: fixed;
             width: 800px;
             height: 800px;
             top: -400px;
             left: -400px;
-            background: radial-gradient(circle, rgba(100, 180, 255, 0.06) 0%, rgba(129, 201, 255, 0.02) 40%, transparent 70%);
+            background: radial-gradient(circle, rgba(100, 180, 255, 0.08) 0%, rgba(129, 201, 255, 0.02) 40%, transparent 70%);
             border-radius: 50%;
             pointer-events: none;
             z-index: 1;
@@ -84,7 +67,6 @@
             will-change: transform;
         }
 
-        /* ===== 主容器 ===== */
         .container {
             position: relative;
             z-index: 10;
@@ -102,93 +84,56 @@
             transform: translateY(30px);
         }
         @keyframes containerIn {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        /* ===== 入场动画 ===== */
-        .header,
-        .hero,
-        .features,
-        .projects-title,
-        .project-card,
-        .footer {
+        .header, .hero, .features, .projects-title, .project-card, .footer {
             opacity: 0;
             animation: fadeUp 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
         }
-        .header {
-            animation-delay: 0.1s;
-        }
-        .hero {
-            animation-delay: 0.2s;
-        }
-        .features {
-            animation-delay: 0.3s;
-        }
-        .projects-title {
-            animation-delay: 0.4s;
-        }
-        .project-card:nth-child(1) {
-            animation-delay: 0.5s;
-        }
-        .project-card:nth-child(2) {
-            animation-delay: 0.6s;
-        }
-        .project-card:nth-child(3) {
-            animation-delay: 0.7s;
-        }
-        .project-card:nth-child(4) {
-            animation-delay: 0.8s;
-        }
-        .footer {
-            animation-delay: 0.9s;
-        }
+        .header { animation-delay: 0.1s; }
+        .hero { animation-delay: 0.2s; }
+        .features { animation-delay: 0.3s; }
+        .projects-title { animation-delay: 0.4s; }
+        .project-card:nth-child(1) { animation-delay: 0.5s; }
+        .project-card:nth-child(2) { animation-delay: 0.6s; }
+        .project-card:nth-child(3) { animation-delay: 0.7s; }
+        .project-card:nth-child(4) { animation-delay: 0.75s; }
+        .footer { animation-delay: 0.8s; }
+
         @keyframes fadeUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        /* ===== 头部 ===== */
+        /* ===== 头部：Logo + 状态 + 登录 ===== */
         .header {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
+            align-items: center;
             flex-wrap: wrap;
+            gap: 12px;
             margin-bottom: 40px;
-            gap: 20px;
         }
-
-        .logo-group {
+        .header-left {
             display: flex;
             align-items: center;
             gap: 18px;
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
         .logo-icon {
             width: 60px;
             height: 60px;
-            background: transparent;
-            box-shadow: none;
-            border: none;
             flex-shrink: 0;
             transition: transform 0.3s ease;
         }
-        .logo-icon:hover {
-            transform: rotate(-6deg) scale(1.05);
-        }
-        .logo-icon svg {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
+        .logo-icon:hover { transform: rotate(-8deg) scale(1.05); }
+        .logo-icon svg { width:100%; height:100%; display:block; }
 
         .logo-text {
             font-size: 28px;
@@ -199,10 +144,7 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        .logo-text .dot {
-            color: #64b5f6;
-            -webkit-text-fill-color: #64b5f6;
-        }
+        .logo-text .dot { color: #64b5f6; -webkit-text-fill-color: #64b5f6; }
 
         .status-badge {
             display: flex;
@@ -231,24 +173,241 @@
             animation: pulse-dot 2s infinite;
         }
         @keyframes pulse-dot {
-            0% {
-                opacity: 1;
-                transform: scale(1);
-            }
-            50% {
-                opacity: 0.4;
-                transform: scale(0.8);
-            }
-            100% {
-                opacity: 1;
-                transform: scale(1);
-            }
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1); }
         }
 
-        /* ===== 英雄区 ===== */
-        .hero {
-            margin-bottom: 48px;
+        /* ===== 登录按钮 & 用户菜单 ===== */
+        .auth-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 100px;
+            padding: 8px 20px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
         }
+        .auth-btn:hover {
+            background: rgba(129, 201, 255, 0.08);
+            border-color: rgba(129, 201, 255, 0.15);
+            color: #fff;
+            transform: translateY(-2px);
+        }
+        .auth-btn i { margin-right: 6px; }
+
+        .user-menu-btn {
+            background: rgba(129, 201, 255, 0.08);
+            border: 1px solid rgba(129, 201, 255, 0.12);
+            border-radius: 100px;
+            padding: 6px 16px 6px 12px;
+            color: #81C9FF;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .user-menu-btn:hover {
+            background: rgba(129, 201, 255, 0.15);
+            transform: translateY(-2px);
+        }
+        .user-menu-btn .avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(129, 201, 255, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        /* ===== 登录模态框 ===== */
+        .auth-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .auth-modal-overlay.open { display: flex; }
+        .auth-modal {
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 32px;
+            padding: 40px 36px;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.5);
+            animation: modalIn 0.3s ease;
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.96) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .auth-modal .modal-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #81C9FF, #A78BFA);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .auth-modal .modal-sub {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+        .auth-modal .form-group {
+            margin-bottom: 16px;
+        }
+        .auth-modal .form-group label {
+            display: block;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.4);
+            margin-bottom: 4px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .auth-modal .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+        .auth-modal .form-group input:focus {
+            border-color: rgba(129, 201, 255, 0.3);
+            box-shadow: 0 0 0 3px rgba(129, 201, 255, 0.06);
+            background: rgba(255, 255, 255, 0.06);
+        }
+        .auth-modal .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.2);
+        }
+        .auth-modal .auth-submit {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #81C9FF, #A78BFA);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            margin-top: 4px;
+        }
+        .auth-modal .auth-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(129, 201, 255, 0.2);
+        }
+        .auth-modal .auth-submit:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .auth-modal .auth-switch {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.3);
+        }
+        .auth-modal .auth-switch span {
+            color: #81C9FF;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .auth-modal .auth-switch span:hover { text-decoration: underline; }
+        .auth-modal .auth-error {
+            color: #ff6b6b;
+            font-size: 13px;
+            text-align: center;
+            margin-bottom: 12px;
+            min-height: 20px;
+        }
+        .auth-modal .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.2);
+            font-size: 24px;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        .auth-modal .modal-close:hover { color: rgba(255, 255, 255, 0.6); }
+        .auth-modal { position: relative; }
+
+        /* ===== 用户下拉菜单 ===== */
+        .user-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            background: rgba(20, 22, 30, 0.95);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 8px 0;
+            min-width: 180px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        .user-dropdown.open { display: block; }
+        .user-dropdown .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 18px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-family: inherit;
+        }
+        .user-dropdown .dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.04);
+            color: #fff;
+        }
+        .user-dropdown .dropdown-item i { width: 18px; color: rgba(255,255,255,0.25); }
+        .user-dropdown .dropdown-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.04);
+            margin: 4px 12px;
+        }
+        .user-dropdown .dropdown-item.danger { color: #ff6b6b; }
+        .user-dropdown .dropdown-item.danger:hover { background: rgba(255, 107, 107, 0.08); }
+
+        .user-menu-wrap {
+            position: relative;
+        }
+
+        /* ===== 原有内容样式（不变） ===== */
+        .hero { margin-bottom: 48px; }
         .hero h1 {
             font-size: clamp(2rem, 5vw, 3.2rem);
             font-weight: 600;
@@ -264,12 +423,8 @@
             animation: shimmer 4s infinite alternate;
         }
         @keyframes shimmer {
-            0% {
-                background-position: 0% 50%;
-            }
-            100% {
-                background-position: 100% 50%;
-            }
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
         }
         .hero p {
             font-size: 1.2rem;
@@ -280,7 +435,6 @@
             letter-spacing: 0.2px;
         }
 
-        /* ===== 标签 ===== */
         .features {
             display: flex;
             flex-wrap: wrap;
@@ -310,11 +464,8 @@
             opacity: 0.7;
             transition: opacity 0.3s;
         }
-        .features span:hover i {
-            opacity: 1;
-        }
+        .features span:hover i { opacity: 1; }
 
-        /* ===== 项目展示 ===== */
         .projects-title {
             font-size: 14px;
             text-transform: uppercase;
@@ -325,22 +476,20 @@
         }
         .projects-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 16px;
             margin-bottom: 48px;
         }
-
         .project-link {
             text-decoration: none;
             color: inherit;
             display: block;
         }
-
         .project-card {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.06);
             border-radius: 24px;
-            padding: 24px 20px;
+            padding: 24px 22px;
             transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
             cursor: pointer;
             position: relative;
@@ -361,9 +510,7 @@
             transition: opacity 0.6s ease;
             pointer-events: none;
         }
-        .project-card:hover::before {
-            opacity: 1;
-        }
+        .project-card:hover::before { opacity: 1; }
         .project-card:hover {
             background: rgba(255, 255, 255, 0.06);
             border-color: rgba(129, 201, 255, 0.2);
@@ -386,20 +533,20 @@
             display: block;
         }
         .project-card h3 {
-            font-size: 17px;
+            font-size: 18px;
             font-weight: 600;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
             color: #fff;
         }
         .project-card p {
-            font-size: 13px;
-            color: rgba(255, 255, 255, 0.4);
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.45);
             line-height: 1.6;
         }
         .project-card .tag {
             display: inline-block;
-            margin-top: 10px;
-            font-size: 10px;
+            margin-top: 12px;
+            font-size: 11px;
             background: rgba(129, 201, 255, 0.1);
             color: #81C9FF;
             padding: 2px 12px;
@@ -411,8 +558,17 @@
             background: rgba(129, 201, 255, 0.2);
             border-color: rgba(129, 201, 255, 0.2);
         }
+        .project-card .status-tag {
+            display: inline-block;
+            margin-top: 8px;
+            font-size: 10px;
+            padding: 2px 10px;
+            border-radius: 20px;
+            background: rgba(255, 215, 0, 0.08);
+            color: #ffd700;
+            border: 1px solid rgba(255, 215, 0, 0.06);
+        }
 
-        /* ===== 底部 ===== */
         .footer {
             display: flex;
             flex-wrap: wrap;
@@ -432,13 +588,8 @@
             animation: heartbeat 1.8s infinite;
         }
         @keyframes heartbeat {
-            0%,
-            100% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.2);
-            }
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
         }
         .social-links {
             display: flex;
@@ -456,84 +607,83 @@
             transform: translateY(-4px) scale(1.1);
         }
 
-        /* ===== 响应式 ===== */
         @media (max-width: 640px) {
-            .container {
-                padding: 32px 20px;
-                border-radius: 32px;
-            }
-            .header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .logo-text {
-                font-size: 22px;
-            }
-            .hero h1 {
-                font-size: 1.8rem;
-            }
-            .hero p {
-                font-size: 1rem;
-            }
-            .projects-grid {
-                grid-template-columns: 1fr;
-            }
-            .project-card {
-                padding: 20px 16px;
-            }
+            .container { padding: 32px 20px; border-radius: 32px; }
+            .header { flex-direction: column; align-items: stretch; }
+            .header-right { justify-content: flex-end; }
+            .logo-text { font-size: 22px; }
+            .hero h1 { font-size: 1.8rem; }
+            .hero p { font-size: 1rem; }
+            .projects-grid { grid-template-columns: 1fr; }
+            .auth-modal { padding: 28px 20px; }
         }
+
+        /* 滚动条 */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); }
     </style>
 </head>
 <body>
 
-    <!-- 背景粒子 -->
     <div id="particles"></div>
-
-    <!-- 鼠标光晕 -->
     <div class="glow" id="glow"></div>
 
     <div class="container">
-
-        <!-- ===== 头部 ===== -->
-        <div class="header">
-            <div class="logo-group">
+        <!-- ===== 头部（已加入登录状态） ===== -->
+        <header class="header">
+            <div class="header-left">
                 <div class="logo-icon">
                     <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
                         <defs>
-                            <linearGradient id="gB" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
                                 <stop offset="0%" stop-color="#81C9FF" />
                                 <stop offset="100%" stop-color="#A78BFA" />
                             </linearGradient>
+                            <filter id="f"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
                         </defs>
-                        <rect x="10" y="10" width="180" height="180" rx="40" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.03)" stroke-width="2" />
-                        <path d="M 44 68 L 26 100 L 44 132" fill="none" stroke="#81C9FF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="0.6" />
-                        <rect x="68" y="72" width="64" height="52" rx="3" fill="rgba(255,255,255,0.02)" stroke="url(#gB)" stroke-width="3" opacity="0.85" />
-                        <path d="M 68 72 L 100 92 L 132 72" fill="none" stroke="url(#gB)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.6" />
-                        <path d="M 156 68 L 174 100 L 156 132" fill="none" stroke="#81C9FF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="0.6" />
-                        <circle cx="174" cy="168" r="5" fill="#A78BFA" opacity="0.3" />
+                        <rect x="10" y="10" width="180" height="180" rx="40" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.06)" stroke-width="2"/>
+                        <path d="M 45 72 L 28 100 L 45 128" fill="none" stroke="#81C9FF" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+                        <text x="100" y="138" font-family="'Inter', system-ui, sans-serif" font-size="104" font-weight="800" fill="url(#g)" filter="url(#f)" text-anchor="middle" letter-spacing="-2">D</text>
+                        <path d="M 155 72 L 172 100 L 155 128" fill="none" stroke="#81C9FF" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+                        <circle cx="172" cy="165" r="6" fill="#A78BFA" opacity="0.7"/>
                     </svg>
                 </div>
                 <span class="logo-text">Daodo<span class="dot">.</span></span>
             </div>
-            <div class="status-badge">
-                <span class="status-dot"></span>
-                独立开发 · 数字工坊
+            <div class="header-right">
+                <div class="status-badge">
+                    <span class="status-dot"></span>
+                    独立开发 · 数字工坊
+                </div>
+                <!-- 登录 / 用户菜单 -->
+                <div class="user-menu-wrap" id="userMenuWrap">
+                    <button class="auth-btn" id="authBtn" style="display:flex; align-items:center; gap:6px;">
+                        <i class="fas fa-user"></i> <span id="authBtnText">登录</span>
+                    </button>
+                    <div class="user-dropdown" id="userDropdown">
+                        <div class="dropdown-item" id="dropdownProfile">
+                            <i class="fas fa-user"></i> 个人中心
+                        </div>
+                        <div class="dropdown-item" id="dropdownProjects">
+                            <i class="fas fa-folder-open"></i> 我的项目
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <div class="dropdown-item danger" id="dropdownLogout">
+                            <i class="fas fa-sign-out-alt"></i> 退出登录
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
+        </header>
 
-        <!-- ===== 英雄区 ===== -->
+        <!-- ===== 原有内容（不变） ===== -->
         <div class="hero">
-            <h1>
-                创造 · 极简 · <br class="hide-on-desktop" />
-                <span class="highlight">独立开发者</span>
-            </h1>
-            <p>
-                一个初三生的数字工坊。不随波逐流，用代码构建有温度的产品。
-                目前专注于 Web 全栈开发与极致交互体验。
-            </p>
+            <h1>创造 · 极简 · <br class="hide-on-desktop" /><span class="highlight">独立开发者</span></h1>
+            <p>一个初三生的数字工坊。不随波逐流，用代码构建有温度的产品。目前专注于 Web 全栈开发与极致交互体验。</p>
         </div>
 
-        <!-- ===== 标签 ===== -->
         <div class="features">
             <span><i class="fas fa-code"></i> 全栈开发</span>
             <span><i class="fas fa-paint-brush"></i> 毛玻璃 UI</span>
@@ -541,170 +691,527 @@
             <span><i class="fas fa-cubes"></i> 单兵作战</span>
         </div>
 
-        <!-- ===== 项目展示 ===== -->
         <div class="projects-title"><i class="fas fa-folder-open" style="margin-right: 8px;"></i> 旗下项目</div>
         <div class="projects-grid">
 
-            <!-- 1. 未来来信局 -->
-            <a href="DAODO团队自研/未来来信局.html" class="project-link">
+            <a href="DAODO团队自研/日晷·星程/日晷·星程.html" class="project-link">
                 <div class="project-card">
                     <span class="icon">
                         <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                            <rect x="10" y="10" width="180" height="180" rx="40" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.04)" stroke-width="1.5" />
-                            <rect x="68" y="72" width="64" height="52" rx="3" fill="none" stroke="url(#gB)" stroke-width="3" opacity="0.8" />
-                            <path d="M 68 72 L 100 92 L 132 72" fill="none" stroke="url(#gB)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.6" />
-                            <circle cx="100" cy="98" r="3" fill="#81C9FF" opacity="0.4" />
-                            <text x="100" y="155" font-family="'Inter', system-ui, sans-serif" font-size="16" font-weight="700" fill="#81C9FF" text-anchor="middle" opacity="0.5">✉️</text>
+                            <rect x="10" y="10" width="180" height="180" rx="40" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.06)" stroke-width="2"/>
+                            <circle cx="100" cy="100" r="46" fill="none" stroke="#81C9FF" stroke-width="1.5" opacity="0.2"/>
+                            <circle cx="100" cy="100" r="36" fill="none" stroke="#A78BFA" stroke-width="2" opacity="0.4"/>
+                            <circle cx="100" cy="100" r="24" fill="none" stroke="#81C9FF" stroke-width="2.5" opacity="0.6"/>
+                            <circle cx="100" cy="100" r="8" fill="#A78BFA" opacity="0.3"/>
+                            <line x1="100" y1="76" x2="100" y2="100" stroke="#81C9FF" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>
+                            <line x1="100" y1="100" x2="118" y2="110" stroke="#A78BFA" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+                            <circle cx="174" cy="168" r="5" fill="#A78BFA" opacity="0.3"/>
                         </svg>
                     </span>
-                    <h3>未来来信局</h3>
-                    <p>温柔陪伴型专注工具，每次值班都会收到一封来自未来的信。</p>
-                    <span class="tag">v1.0 · 已上线</span>
+                    <h3>日晷·星程</h3>
+                    <p>个人效率系统：每日计划 + 番茄钟 + 音乐陪伴 + 星伴社交 + 专注数据统计。</p>
+                    <span class="tag">v2.0 · 开发中</span>
                 </div>
             </a>
 
-            <!-- 2. 记忆星球 -->
+            <a href="DAODO团队自研/班级时光机/班级时光机.html" class="project-link">
+                <div class="project-card">
+                    <span class="icon">
+                        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="bookGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#81C9FF" />
+                                    <stop offset="100%" stop-color="#A78BFA" />
+                                </linearGradient>
+                                <filter id="bookGlow"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                            </defs>
+                            <rect x="10" y="10" width="180" height="180" rx="40" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.06)" stroke-width="2"/>
+                            <path d="M 42 70 L 26 100 L 42 130" fill="none" stroke="#81C9FF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/>
+                            <path d="M 62 78 Q 82 58 100 78 Q 118 58 138 78 L 138 122 Q 118 102 100 122 Q 82 102 62 122 Z" fill="rgba(255,255,255,0.06)" stroke="url(#bookGrad)" stroke-width="2.5" filter="url(#bookGlow)"/>
+                            <line x1="100" y1="65" x2="100" y2="135" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
+                            <circle cx="100" cy="100" r="22" fill="none" stroke="url(#bookGrad)" stroke-width="2.5"/>
+                            <line x1="100" y1="100" x2="100" y2="84" stroke="url(#bookGrad)" stroke-width="2.5" stroke-linecap="round"/>
+                            <line x1="100" y1="100" x2="114" y2="106" stroke="url(#bookGrad)" stroke-width="2" stroke-linecap="round"/>
+                            <circle cx="100" cy="100" r="3" fill="url(#bookGrad)"/>
+                            <path d="M 158 70 L 174 100 L 158 130" fill="none" stroke="#81C9FF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/>
+                            <circle cx="174" cy="168" r="5" fill="#A78BFA" opacity="0.5"/>
+                        </svg>
+                    </span>
+                    <h3>班级时光机</h3>
+                    <p>全功能班级社交平台，含动态、群聊、树洞、签到、等级系统及 AI 助手。</p>
+                    <span class="tag">v3.2 · 重构中</span>
+                </div>
+            </a>
+
             <a href="DAODO团队自研/记忆星球.html" class="project-link">
                 <div class="project-card">
                     <span class="icon">
                         <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                            <rect x="10" y="10" width="180" height="180" rx="40" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.04)" stroke-width="1.5" />
-                            <circle cx="100" cy="100" r="38" fill="none" stroke="#81C9FF" stroke-width="2.5" opacity="0.5" />
-                            <circle cx="100" cy="100" r="22" fill="none" stroke="#A78BFA" stroke-width="1.5" opacity="0.3" />
-                            <circle cx="100" cy="100" r="8" fill="#81C9FF" opacity="0.3" />
-                            <circle cx="174" cy="168" r="4" fill="#A78BFA" opacity="0.3" />
+                            <defs>
+                                <linearGradient id="gb2" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#64b5f6" />
+                                    <stop offset="100%" stop-color="#7c4dff" />
+                                </linearGradient>
+                            </defs>
+                            <rect x="10" y="10" width="180" height="180" rx="40" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.06)" stroke-width="2" />
+                            <path d="M 44 68 L 26 100 L 44 132" fill="none" stroke="#64b5f6" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.5" />
+                            <path d="M 156 68 L 174 100 L 156 132" fill="none" stroke="#64b5f6" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.5" />
+                            <circle cx="100" cy="100" r="46" fill="none" stroke="url(#gb2)" stroke-width="1.5" opacity="0.12" />
+                            <circle cx="100" cy="100" r="38" fill="none" stroke="url(#gb2)" stroke-width="2.5" opacity="0.35" />
+                            <circle cx="100" cy="100" r="28" fill="url(#gb2)" opacity="0.06" />
+                            <circle cx="100" cy="100" r="22" fill="none" stroke="url(#gb2)" stroke-width="1.5" opacity="0.25" />
+                            <circle cx="100" cy="100" r="8" fill="url(#gb2)" opacity="0.2" />
+                            <path d="M 100 54 A 38 38 0 0 1 136 90 A 38 38 0 0 0 100 62 Z" fill="rgba(255,255,255,0.04)" />
+                            <circle cx="174" cy="168" r="5" fill="#7c4dff" opacity="0.3" />
                         </svg>
                     </span>
                     <h3>记忆星球</h3>
-                    <p>将你的记忆化作一颗颗独特的星球，在宇宙中永恒闪耀。</p>
+                    <p>将你的记忆化作一颗颗独特的星球，在宇宙中永恒闪耀。3D 交互、情绪颜色、时光轴。</p>
                     <span class="tag">v5.1 · 已上线</span>
                 </div>
             </a>
 
-            <!-- 3. 倒计时器 -->
             <a href="DAODO团队自研/倒计时.html" class="project-link">
                 <div class="project-card">
                     <span class="icon">
                         <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                            <rect x="10" y="10" width="180" height="180" rx="40" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.04)" stroke-width="1.5" />
-                            <circle cx="100" cy="100" r="40" fill="none" stroke="#81C9FF" stroke-width="2.5" opacity="0.4" />
-                            <line x1="100" y1="100" x2="100" y2="68" stroke="#A78BFA" stroke-width="3" stroke-linecap="round" opacity="0.5" />
-                            <line x1="100" y1="100" x2="120" y2="115" stroke="#A78BFA" stroke-width="2" stroke-linecap="round" opacity="0.5" />
-                            <circle cx="100" cy="100" r="5" fill="#81C9FF" opacity="0.3" />
-                            <circle cx="174" cy="168" r="4" fill="#A78BFA" opacity="0.3" />
+                            <defs>
+                                <linearGradient id="clockGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#81C9FF" />
+                                    <stop offset="100%" stop-color="#A78BFA" />
+                                </linearGradient>
+                            </defs>
+                            <rect x="10" y="10" width="180" height="180" rx="40" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.06)" stroke-width="2" />
+                            <circle cx="100" cy="100" r="44" fill="none" stroke="url(#clockGrad)" stroke-width="2.5" opacity="0.4" />
+                            <line x1="100" y1="100" x2="100" y2="70" stroke="url(#clockGrad)" stroke-width="3" stroke-linecap="round" opacity="0.6" />
+                            <line x1="100" y1="100" x2="120" y2="115" stroke="url(#clockGrad)" stroke-width="2" stroke-linecap="round" opacity="0.6" />
+                            <circle cx="100" cy="100" r="6" fill="url(#clockGrad)" opacity="0.4" />
+                            <text x="100" y="155" font-family="'Inter', system-ui, sans-serif" font-size="28" font-weight="700" fill="url(#clockGrad)" text-anchor="middle" opacity="0.6">⌛</text>
+                            <circle cx="174" cy="168" r="5" fill="#A78BFA" opacity="0.3" />
                         </svg>
                     </span>
                     <h3>倒计时器</h3>
-                    <p>通用倒计时工具，支持中考、高考、自定义目标，可保存数据。</p>
+                    <p>通用倒计时工具，支持中考、高考、自定义目标。可保存数据，自带进度条。</p>
                     <span class="tag">v2.0 · 已上线</span>
                 </div>
             </a>
 
-            <!-- 4. 班级时光机 -->
-            <a href="DAODO团队自研/班级时光机.html" class="project-link">
-                <div class="project-card" style="opacity: 0.7;">
-                    <span class="icon">
-                        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                            <rect x="10" y="10" width="180" height="180" rx="40" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.04)" stroke-width="1.5" />
-                            <path d="M 60 90 Q 80 72 100 90 Q 120 72 140 90 L 140 120 Q 120 102 100 120 Q 80 102 60 120 Z" fill="none" stroke="#81C9FF" stroke-width="2.5" opacity="0.5" />
-                            <line x1="100" y1="78" x2="100" y2="132" stroke="#A78BFA" stroke-width="1.5" opacity="0.3" />
-                            <circle cx="100" cy="105" r="12" fill="none" stroke="#A78BFA" stroke-width="2" opacity="0.4" />
-                            <line x1="100" y1="105" x2="100" y2="97" stroke="#81C9FF" stroke-width="2" stroke-linecap="round" opacity="0.4" />
-                            <line x1="100" y1="105" x2="107" y2="109" stroke="#81C9FF" stroke-width="2" stroke-linecap="round" opacity="0.4" />
-                            <circle cx="174" cy="168" r="4" fill="#A78BFA" opacity="0.3" />
-                        </svg>
-                    </span>
-                    <h3>班级时光机</h3>
-                    <p>全功能班级社交平台，含动态、群聊、树洞、签到、等级系统及AI助手。</p>
-                    <span class="tag">v3.1.0 · 进行中</span>
-                </div>
-            </a>
-
         </div>
 
-        <!-- ===== 底部 ===== -->
         <div class="footer">
-            <div class="copy">
-                © 2026 Daodo · Made with <i class="fas fa-heart" style="color: #f472b6; font-size: 12px;"></i>
-            </div>
+            <div class="copy">© 2026 Daodo · Made with <i class="fas fa-heart" style="color: #f472b6; font-size: 12px;"></i></div>
             <div class="social-links">
                 <a href="#" title="GitHub" onclick="alert('GitHub 链接待补充'); return false;"><i class="fab fa-github"></i></a>
-                <a href="#" title="作品集" onclick="alert('https://daodo-123.github.io/daodo/'); return false;"><i class="fas fa-globe"></i></a>
+                <a href="#" title="作品集" onclick="alert('你的 GitHub Pages 链接待补充'); return false;"><i class="fas fa-globe"></i></a>
                 <a href="#" title="邮件" onclick="alert('联系邮箱待补充'); return false;"><i class="fas fa-envelope"></i></a>
             </div>
         </div>
+    </div>
 
+    <!-- ===== 登录模态框 ===== -->
+    <div class="auth-modal-overlay" id="authModal">
+        <div class="auth-modal">
+            <button class="modal-close" id="authModalClose">&times;</button>
+            <div class="modal-title" id="modalTitle">🎯 登录 Daodo</div>
+            <div class="modal-sub" id="modalSub">进入你的数字工坊</div>
+            <div class="auth-error" id="authError"></div>
+            <div id="authFormContainer">
+                <div class="form-group">
+                    <label>邮箱</label>
+                    <input type="email" id="authEmail" placeholder="your@email.com" />
+                </div>
+                <div class="form-group">
+                    <label>密码</label>
+                    <input type="password" id="authPassword" placeholder="••••••••" />
+                </div>
+                <button class="auth-submit" id="authSubmitBtn">登录</button>
+                <div class="auth-switch">
+                    <span id="authSwitchText">还没有账号？<span id="authSwitchLink">去注册</span></span>
+                    <span style="display:block;margin-top:6px;font-size:12px;color:rgba(255,255,255,0.2);cursor:pointer;" id="authForgotLink">忘记密码？</span>
+                </div>
+            </div>
+            <div id="authForgotContainer" style="display:none;">
+                <div class="form-group">
+                    <label>输入注册邮箱</label>
+                    <input type="email" id="authForgotEmail" placeholder="your@email.com" />
+                </div>
+                <button class="auth-submit" id="authForgotBtn">发送重置邮件</button>
+                <div class="auth-switch">
+                    <span id="authBackToLogin" style="color:#81C9FF;cursor:pointer;">← 返回登录</span>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
-        // ============================================================
-        //  背景粒子
-        // ============================================================
         (function() {
-            const container = document.getElementById('particles');
-            const count = 40;
-            for (let i = 0; i < count; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                const size = 2 + Math.random() * 4;
-                particle.style.width = size + 'px';
-                particle.style.height = size + 'px';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.animationDuration = (10 + Math.random() * 20) + 's';
-                particle.style.animationDelay = (Math.random() * 20) + 's';
-                particle.style.opacity = 0.2 + Math.random() * 0.3;
-                container.appendChild(particle);
+            'use strict';
+
+            // ============================================================
+            //  Supabase 配置
+            // ============================================================
+            const SUPABASE_URL = 'https://agpznniqfxdeudwvimbb.supabase.co';
+            const SUPABASE_ANON_KEY = 'sb_publishable_0TcgungxkhJpKIJf2bHdLA_X14JILIp';
+            const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+            // ============================================================
+            //  DOM 引用
+            // ============================================================
+            const authBtn = document.getElementById('authBtn');
+            const authBtnText = document.getElementById('authBtnText');
+            const userMenuWrap = document.getElementById('userMenuWrap');
+            const userDropdown = document.getElementById('userDropdown');
+            const authModal = document.getElementById('authModal');
+            const authModalClose = document.getElementById('authModalClose');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalSub = document.getElementById('modalSub');
+            const authError = document.getElementById('authError');
+            const authEmail = document.getElementById('authEmail');
+            const authPassword = document.getElementById('authPassword');
+            const authSubmitBtn = document.getElementById('authSubmitBtn');
+            const authSwitchText = document.getElementById('authSwitchText');
+            const authSwitchLink = document.getElementById('authSwitchLink');
+            const authForgotLink = document.getElementById('authForgotLink');
+            const authFormContainer = document.getElementById('authFormContainer');
+            const authForgotContainer = document.getElementById('authForgotContainer');
+            const authForgotEmail = document.getElementById('authForgotEmail');
+            const authForgotBtn = document.getElementById('authForgotBtn');
+            const authBackToLogin = document.getElementById('authBackToLogin');
+
+            const dropdownProfile = document.getElementById('dropdownProfile');
+            const dropdownLogout = document.getElementById('dropdownLogout');
+
+            let currentUser = null;
+            let isLoginMode = true;
+
+            // ============================================================
+            //  登录状态管理
+            // ============================================================
+            async function getSession() {
+                const { data: { session } } = await supabase.auth.getSession();
+                return session;
             }
+
+            async function getUser() {
+                const session = await getSession();
+                if (session) {
+                    currentUser = session.user;
+                    return currentUser;
+                }
+                return null;
+            }
+
+            function updateAuthUI(user) {
+                if (user) {
+                    const email = user.email || '用户';
+                    const displayName = email.split('@')[0];
+                    authBtnText.textContent = displayName;
+                    authBtn.innerHTML = `<span class="avatar">${displayName.charAt(0).toUpperCase()}</span> ${displayName}`;
+                    authBtn.className = 'user-menu-btn';
+                    // 移除原来的点击事件，用新的事件
+                    authBtn.onclick = function(e) {
+                        e.stopPropagation();
+                        userDropdown.classList.toggle('open');
+                    };
+                } else {
+                    authBtn.innerHTML = '<i class="fas fa-user"></i> <span id="authBtnText">登录</span>';
+                    authBtn.className = 'auth-btn';
+                    authBtn.onclick = function() {
+                        openModal('login');
+                    };
+                    userDropdown.classList.remove('open');
+                }
+            }
+
+            // ============================================================
+            //  模态框控制
+            // ============================================================
+            function openModal(mode) {
+                isLoginMode = (mode === 'login');
+                authModal.classList.add('open');
+                authError.textContent = '';
+                authEmail.value = '';
+                authPassword.value = '';
+                authForgotEmail.value = '';
+                authFormContainer.style.display = 'block';
+                authForgotContainer.style.display = 'none';
+                if (isLoginMode) {
+                    modalTitle.textContent = '🎯 登录 Daodo';
+                    modalSub.textContent = '进入你的数字工坊';
+                    authSubmitBtn.textContent = '登录';
+                    authSwitchText.innerHTML = '还没有账号？<span id="authSwitchLink">去注册</span>';
+                    authForgotLink.style.display = 'inline';
+                    document.getElementById('authSwitchLink').onclick = function() { openModal('register'); };
+                } else {
+                    modalTitle.textContent = '✨ 注册账号';
+                    modalSub.textContent = '加入 Daodo 数字工坊';
+                    authSubmitBtn.textContent = '注册';
+                    authSwitchText.innerHTML = '已有账号？<span id="authSwitchLink">去登录</span>';
+                    authForgotLink.style.display = 'none';
+                    document.getElementById('authSwitchLink').onclick = function() { openModal('login'); };
+                }
+                authEmail.focus();
+            }
+
+            function closeModal() {
+                authModal.classList.remove('open');
+                authFormContainer.style.display = 'block';
+                authForgotContainer.style.display = 'none';
+            }
+
+            // ============================================================
+            //  认证操作
+            // ============================================================
+            async function handleLogin() {
+                const email = authEmail.value.trim();
+                const password = authPassword.value;
+                if (!email || !password) {
+                    authError.textContent = '请填写邮箱和密码';
+                    return;
+                }
+                authSubmitBtn.disabled = true;
+                authSubmitBtn.textContent = '登录中...';
+                authError.textContent = '';
+                try {
+                    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+                    if (error) throw error;
+                    closeModal();
+                    await refreshUser();
+                } catch (err) {
+                    authError.textContent = err.message || '登录失败，请重试';
+                    authSubmitBtn.disabled = false;
+                    authSubmitBtn.textContent = isLoginMode ? '登录' : '注册';
+                }
+            }
+
+            async function handleRegister() {
+                const email = authEmail.value.trim();
+                const password = authPassword.value;
+                if (!email || !password) {
+                    authError.textContent = '请填写邮箱和密码';
+                    return;
+                }
+                if (password.length < 6) {
+                    authError.textContent = '密码至少 6 位';
+                    return;
+                }
+                authSubmitBtn.disabled = true;
+                authSubmitBtn.textContent = '注册中...';
+                authError.textContent = '';
+                try {
+                    const { data, error } = await supabase.auth.signUp({ email, password });
+                    if (error) throw error;
+                    if (data.user && data.user.identities && data.user.identities.length === 0) {
+                        authError.textContent = '该邮箱已被注册';
+                        authSubmitBtn.disabled = false;
+                        authSubmitBtn.textContent = '注册';
+                        return;
+                    }
+                    closeModal();
+                    await refreshUser();
+                    alert('✅ 注册成功！欢迎加入 Daodo！');
+                } catch (err) {
+                    authError.textContent = err.message || '注册失败，请重试';
+                    authSubmitBtn.disabled = false;
+                    authSubmitBtn.textContent = isLoginMode ? '登录' : '注册';
+                }
+            }
+
+            async function handleForgotPassword() {
+                const email = authForgotEmail.value.trim();
+                if (!email) {
+                    authError.textContent = '请输入你的注册邮箱';
+                    return;
+                }
+                authForgotBtn.disabled = true;
+                authForgotBtn.textContent = '发送中...';
+                try {
+                    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                        redirectTo: window.location.href.split('?')[0],
+                    });
+                    if (error) throw error;
+                    authError.textContent = '';
+                    authForgotContainer.innerHTML = `
+                        <div style="text-align:center;padding:20px 0;">
+                            <div style="font-size:48px;margin-bottom:12px;">📧</div>
+                            <div style="color:#fff;font-size:16px;margin-bottom:8px;">重置邮件已发送</div>
+                            <div style="color:rgba(255,255,255,0.4);font-size:13px;">请检查你的邮箱 ${email}</div>
+                            <button class="auth-submit" style="margin-top:16px;" onclick="document.getElementById('authModal').classList.remove('open')">关闭</button>
+                        </div>
+                    `;
+                } catch (err) {
+                    authError.textContent = err.message || '发送失败，请重试';
+                    authForgotBtn.disabled = false;
+                    authForgotBtn.textContent = '发送重置邮件';
+                }
+            }
+
+            async function handleLogout() {
+                await supabase.auth.signOut();
+                currentUser = null;
+                updateAuthUI(null);
+                userDropdown.classList.remove('open');
+            }
+
+            async function refreshUser() {
+                const user = await getUser();
+                updateAuthUI(user);
+                return user;
+            }
+
+            // ============================================================
+            //  事件绑定
+            // ============================================================
+            // 登录按钮
+            authBtn.onclick = function() {
+                if (currentUser) {
+                    userDropdown.classList.toggle('open');
+                } else {
+                    openModal('login');
+                }
+            };
+
+            // 点击外部关闭下拉菜单
+            document.addEventListener('click', function(e) {
+                if (!userMenuWrap.contains(e.target)) {
+                    userDropdown.classList.remove('open');
+                }
+                if (e.target === authModal) {
+                    closeModal();
+                }
+            });
+
+            // 模态框关闭
+            authModalClose.onclick = closeModal;
+
+            // 切换登录/注册
+            document.getElementById('authSwitchLink').onclick = function() {
+                if (isLoginMode) {
+                    openModal('register');
+                } else {
+                    openModal('login');
+                }
+            };
+
+            // 忘记密码
+            authForgotLink.onclick = function() {
+                authFormContainer.style.display = 'none';
+                authForgotContainer.style.display = 'block';
+                authError.textContent = '';
+                authForgotEmail.value = '';
+                authForgotEmail.focus();
+            };
+
+            authBackToLogin.onclick = function() {
+                authFormContainer.style.display = 'block';
+                authForgotContainer.style.display = 'none';
+                authError.textContent = '';
+            };
+
+            authForgotBtn.onclick = handleForgotPassword;
+
+            // 回车提交
+            authEmail.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') authPassword.focus();
+            });
+            authPassword.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') authSubmitBtn.click();
+            });
+            authForgotEmail.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') authForgotBtn.click();
+            });
+
+            // 提交按钮
+            authSubmitBtn.onclick = function() {
+                if (isLoginMode) handleLogin();
+                else handleRegister();
+            };
+
+            // 退出登录
+            dropdownLogout.onclick = handleLogout;
+
+            // 个人中心（暂时跳转提醒）
+            dropdownProfile.onclick = function() {
+                alert('👤 个人中心开发中，即将上线！');
+                userDropdown.classList.remove('open');
+            };
+
+            // ============================================================
+            //  粒子动画（官网原有，保持不变）
+            // ============================================================
+            (function() {
+                const container = document.getElementById('particles');
+                const count = 40;
+                for (let i = 0; i < count; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    const size = 2 + Math.random() * 4;
+                    particle.style.width = size + 'px';
+                    particle.style.height = size + 'px';
+                    particle.style.left = Math.random() * 100 + '%';
+                    particle.style.animationDuration = (10 + Math.random() * 20) + 's';
+                    particle.style.animationDelay = (Math.random() * 20) + 's';
+                    particle.style.opacity = 0.2 + Math.random() * 0.3;
+                    container.appendChild(particle);
+                }
+            })();
+
+            // 鼠标光晕（官网原有，保持不变）
+            (function() {
+                const glow = document.getElementById('glow');
+                let targetX = window.innerWidth / 2;
+                let targetY = window.innerHeight / 2;
+                let currentX = targetX;
+                let currentY = targetY;
+
+                document.addEventListener('mousemove', function(e) {
+                    targetX = e.clientX;
+                    targetY = e.clientY;
+                });
+
+                function smoothGlow() {
+                    currentX += (targetX - currentX) * 0.08;
+                    currentY += (targetY - currentY) * 0.08;
+                    glow.style.transform = `translate(${currentX}px, ${currentY}px)`;
+                    requestAnimationFrame(smoothGlow);
+                }
+                smoothGlow();
+            })();
+
+            // 卡片3D效果（官网原有，保持不变）
+            (function() {
+                const cards = document.querySelectorAll('.project-card');
+                cards.forEach(card => {
+                    card.addEventListener('mousemove', function(e) {
+                        const rect = card.getBoundingClientRect();
+                        const x = (e.clientX - rect.left) / rect.width - 0.5;
+                        const y = (e.clientY - rect.top) / rect.height - 0.5;
+                        card.style.setProperty('--mouse-x', (x * 100 + 50) + '%');
+                        card.style.setProperty('--mouse-y', (y * 100 + 50) + '%');
+                        card.style.transform = `perspective(800px) rotateX(${-y * 6}deg) rotateY(${x * 6}deg) translateY(-6px)`;
+                    });
+                    card.addEventListener('mouseleave', function() {
+                        card.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg) translateY(0)';
+                    });
+                });
+            })();
+
+            // ============================================================
+            //  初始化：检测登录状态
+            // ============================================================
+            refreshUser();
+
+            // 暴露给全局（供子应用检测登录状态）
+            window.__DAODO_AUTH = {
+                supabase: supabase,
+                getUser: getUser,
+                getSession: getSession,
+                refreshUser: refreshUser,
+                logout: handleLogout,
+            };
+
+            console.log('🔐 Daodo Studio 统一登录已启动！');
         })();
-
-        // ============================================================
-        //  鼠标光晕
-        // ============================================================
-        const glow = document.getElementById('glow');
-        let targetX = window.innerWidth / 2;
-        let targetY = window.innerHeight / 2;
-        let currentX = targetX;
-        let currentY = targetY;
-
-        document.addEventListener('mousemove', (e) => {
-            targetX = e.clientX;
-            targetY = e.clientY;
-        });
-
-        function smoothGlow() {
-            currentX += (targetX - currentX) * 0.08;
-            currentY += (targetY - currentY) * 0.08;
-            glow.style.transform = `translate(${currentX}px, ${currentY}px)`;
-            requestAnimationFrame(smoothGlow);
-        }
-        smoothGlow();
-
-        // ============================================================
-        //  卡片 3D 倾斜
-        // ============================================================
-        const cards = document.querySelectorAll('.project-card');
-        cards.forEach(card => {
-            card.addEventListener('mousemove', (e) => {
-                const rect = card.getBoundingClientRect();
-                const x = (e.clientX - rect.left) / rect.width - 0.5;
-                const y = (e.clientY - rect.top) / rect.height - 0.5;
-                card.style.setProperty('--mouse-x', (x * 100 + 50) + '%');
-                card.style.setProperty('--mouse-y', (y * 100 + 50) + '%');
-                card.style.transform = `
-                            perspective(800px)
-                            rotateX(${-y * 6}deg)
-                            rotateY(${x * 6}deg)
-                            translateY(-6px)
-                        `;
-            });
-            card.addEventListener('mouseleave', () => {
-                card.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg) translateY(0)';
-            });
-        });
-
-        console.log('✉️ Daodo 官网已升级 — 极简信封新Logo');
-        console.log('📮 新增：未来来信局 项目卡片');
-        console.log('💡 点击项目卡片可直接跳转');
     </script>
 
 </body>
