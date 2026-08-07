@@ -1,7 +1,7 @@
 // ================================================================
-//  app.js - 班级时光机 v3.2 (完整版)
-//  包含所有功能：认证、班级、动态、消息、AI、群聊、个人中心、设置、管理后台等
-//  修复：多图上传、进度条、点赞动画、QQ式气泡、表格、所有交互
+//  app.js - 班级时光机 v3.2 完整修复版
+//  修复：粒子/光晕/滚动条/班级标题/表格/QQ气泡/点赞动画/多图上传/进度条
+//  第一段：工具函数 → 动态发布
 // ================================================================
 
 // ---------- 全局状态 ----------
@@ -430,9 +430,6 @@ async function addExp(email, expAmount, reason) {
         currentUser.stats = { exp: newExp, total_exp: totalExp, points: points, level: newLevel, login_streak: stats.data.login_streak };
     }
 }
-// ================================================================
-//  第 2 段：班级管理 + 动态发布（含多图 + 进度条）
-// ================================================================
 
 // ---------- 班级管理 ----------
 async function loadUserClasses() {
@@ -448,6 +445,7 @@ async function loadUserClasses() {
         currentClassRole = userClasses[0].role;
     }
     renderClassList();
+    updatePageTitle();
 }
 
 async function renderClassList() {
@@ -552,6 +550,37 @@ async function searchClasses(keyword) {
         .ilike('name', '%' + keyword + '%');
     if (error) { console.error(error); return []; }
     return data || [];
+}
+
+// ---------- 页面标题动态化（修复⑩） ----------
+function updatePageTitle() {
+    var titleEl = document.getElementById('pageTitle');
+    if (!titleEl) return;
+    if (!currentUser) {
+        document.title = '班级时光机 · 登录';
+        titleEl.textContent = '班级时光机';
+        return;
+    }
+    // 如果在主主页或没有班级
+    if (!currentClassId || userClasses.length === 0) {
+        document.title = '班级时光机 · 主页';
+        titleEl.textContent = '班级时光机';
+        return;
+    }
+    var className = '';
+    for (var i = 0; i < userClasses.length; i++) {
+        if (userClasses[i].class_id === currentClassId && userClasses[i].classes) {
+            className = userClasses[i].classes.name;
+            break;
+        }
+    }
+    if (className) {
+        document.title = className + ' · 班级时光机';
+        titleEl.textContent = className + ' · 博客';
+    } else {
+        document.title = '班级时光机 · 博客';
+        titleEl.textContent = '班级时光机';
+    }
 }
 
 // ---------- 视图切换核心 ----------
@@ -683,6 +712,7 @@ function goHome() {
     renderClassList();
     document.getElementById('homeNavTitle').textContent = '班级时光机';
     document.title = '班级时光机 · 主页';
+    updatePageTitle();
 }
 
 function enterClass(classId) {
@@ -710,6 +740,7 @@ function enterClass(classId) {
     }
     document.getElementById('classNavTitle').textContent = className || '班级空间';
     document.title = className + ' · 班级时光机';
+    updatePageTitle();
 
     document.getElementById('navMainItems').classList.add('hidden');
     document.getElementById('navClassItems').classList.remove('hidden');
@@ -771,270 +802,6 @@ function toggleDrawer(show) {
         overlay.classList.remove('open');
     }
 }
-
-// ---------- 个人中心 ----------
-function showProfile() {
-    document.getElementById('view-home').classList.remove('active');
-    document.getElementById('view-class').classList.remove('active');
-    document.getElementById('view-settings').classList.remove('active');
-    document.getElementById('view-profile').classList.add('active');
-    document.getElementById('homeTopLeft').classList.remove('hidden');
-    document.getElementById('classTopLeft').classList.add('hidden');
-    document.getElementById('navMainItems').classList.remove('hidden');
-    document.getElementById('navClassItems').classList.add('hidden');
-    document.querySelectorAll('#navMainItems .nav-item').forEach(function(item) {
-        item.classList.remove('active');
-        if (item.dataset.tab === 'profile') item.classList.add('active');
-    });
-    renderProfileContent();
-}
-
-function renderProfileContent() {
-    var container = document.getElementById('profileContent');
-    if (!currentUser) return;
-    var stats = currentUser.stats || { level: 1, exp: 0, total_exp: 0, points: 0, login_streak: 0 };
-    var levelInfo = getLevelInfo(stats.exp || 0);
-    var roleTag = currentUserRole === 'owner' ? '⭐ 站主' : currentUserRole === 'teacher' ? '🎓 教师' : '👤 学生';
-
-    container.innerHTML = `
-        <div class="panel">
-            <h3>👤 个人资料</h3>
-            <div style="display:flex;align-items:center;gap:20px;margin:16px 0;flex-wrap:wrap;">
-                <img class="avatar" src="${currentUser.avatar || getDefaultAvatarSVG('👤')}" style="width:80px;height:80px;border-radius:50%;border:1px solid var(--border-subtle);">
-                <div>
-                    <div style="font-size:1.3rem;font-weight:600;">${currentUser.nickname}</div>
-                    <div style="color:var(--text-secondary);">${currentUser.sign || '这个人很懒，什么也没有留下~'}</div>
-                    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;">
-                        <span class="level-badge ${getLevelBadgeClass(levelInfo.level)}" style="display:inline-flex;align-items:center;justify-content:center;border-radius:50%;width:34px;height:34px;font-weight:700;font-size:0.7rem;">Lv.${levelInfo.level}</span>
-                        <span style="font-size:0.9rem;color:var(--text-secondary);">${levelInfo.title}</span>
-                        <span style="background:var(--brand-start);color:#fff;padding:2px 12px;border-radius:var(--radius-full);font-size:0.7rem;">${roleTag}</span>
-                    </div>
-                </div>
-            </div>
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:10px;background:var(--bg-card);padding:14px;border-radius:var(--radius-sm);margin-bottom:16px;">
-                <div><span style="color:var(--text-secondary);font-size:0.8rem;">经验</span><br><span style="font-weight:700;font-size:1.1rem;">${stats.exp || 0}</span></div>
-                <div><span style="color:var(--text-secondary);font-size:0.8rem;">下一级</span><br><span style="font-weight:700;font-size:1.1rem;">${levelInfo.nextExp || 0}</span></div>
-                <div><span style="color:var(--text-secondary);font-size:0.8rem;">积分</span><br><span style="font-weight:700;font-size:1.1rem;color:#D4AF37;">${stats.points || 0}</span></div>
-                <div><span style="color:var(--text-secondary);font-size:0.8rem;">连续签到</span><br><span style="font-weight:700;font-size:1.1rem;">${stats.login_streak || 0}</span> 天</div>
-            </div>
-            <div class="view-line">邮箱：${currentUser.email}</div>
-            <div class="view-line">星座：${currentUser.profile?.star || '未填写'}</div>
-            <div class="view-line">生日：${currentUser.profile?.birth || '未填写'}</div>
-            <div class="view-line">身高：${currentUser.profile?.height || '秘密'}</div>
-            <div class="view-line">体重：${currentUser.profile?.weight || '秘密'}</div>
-            <div style="margin-top:20px;border-top:1px solid var(--border-subtle);padding-top:16px;">
-                <h4 style="color:var(--text-primary);font-weight:700;">🏆 我的成就</h4>
-                <div id="achievementList" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;"></div>
-            </div>
-        </div>
-    `;
-    // 加载成就
-    computeAchievements(currentUser.email).then(function(ach) {
-        var wrap = document.getElementById('achievementList');
-        if (!wrap) return;
-        if (ach.length === 0) { wrap.innerHTML = '<div style="color:var(--text-secondary);font-size:0.9rem;">暂无成就</div>'; return; }
-        wrap.innerHTML = ach.map(function(a) {
-            return '<div style="display:inline-block;font-size:1.5rem;text-align:center;padding:8px;background:var(--bg-card);border-radius:var(--radius-sm);min-width:60px;margin:4px;border:2px solid #D4AF37;"><div>' + a.label + '</div><div style="font-size:0.6rem;color:var(--text-secondary);">' + a.desc + '</div></div>';
-        }).join('');
-    });
-}
-
-async function computeAchievements(email) {
-    var supabase = getSupabase();
-    var { data: dyns } = await supabase.from('dynamics').select('id', { count: 'exact' }).eq('user_email', email);
-    var dynCount = dyns ? dyns.length : 0;
-    var { data: likes } = await supabase.from('likes').select('id', { count: 'exact' }).eq('user_email', email);
-    var likeCount = likes ? likes.length : 0;
-    var { data: collects } = await supabase.from('collects').select('id', { count: 'exact' }).eq('user_email', email);
-    var collectCount = collects ? collects.length : 0;
-    var ach = [];
-    if (dynCount >= 5) ach.push({ label: '📝 初露锋芒', desc: '发布5条动态' });
-    if (dynCount >= 20) ach.push({ label: '🔥 动态达人', desc: '发布20条动态' });
-    if (likeCount >= 10) ach.push({ label: '👍 小有名气', desc: '获得10个点赞' });
-    if (likeCount >= 50) ach.push({ label: '⭐ 班级明星', desc: '获得50个点赞' });
-    if (collectCount >= 5) ach.push({ label: '🔖 收藏家', desc: '收藏5条动态' });
-    var stats = currentUser.stats || {};
-    if (stats.login_streak >= 7) ach.push({ label: '📆 一周之约', desc: '连续登录7天' });
-    if (stats.login_streak >= 30) ach.push({ label: '🌙 满月打卡', desc: '连续登录30天' });
-    if (stats.level >= 5) ach.push({ label: '🌟 班级达人', desc: '等级达到Lv.5' });
-    if (stats.level >= 10) ach.push({ label: '👑 超凡之上', desc: '等级达到Lv.10' });
-    return ach;
-}
-
-// ---------- 设置 ----------
-function showSettings() {
-    document.getElementById('view-home').classList.remove('active');
-    document.getElementById('view-class').classList.remove('active');
-    document.getElementById('view-profile').classList.remove('active');
-    document.getElementById('view-settings').classList.add('active');
-    document.getElementById('homeTopLeft').classList.remove('hidden');
-    document.getElementById('classTopLeft').classList.add('hidden');
-    document.getElementById('navMainItems').classList.remove('hidden');
-    document.getElementById('navClassItems').classList.add('hidden');
-    document.querySelectorAll('#navMainItems .nav-item').forEach(function(item) {
-        item.classList.remove('active');
-        if (item.dataset.tab === 'settings') item.classList.add('active');
-    });
-    renderSettingsView();
-}
-
-function renderSettingsView() {
-    var container = document.getElementById('settingsContent');
-    var settings = loadSettings();
-    var isDark = !settings.theme || settings.theme === 'dark' || settings.theme === 'auto';
-
-    container.innerHTML = `
-        <div class="panel">
-            <h3>⚙️ 设置</h3>
-            <div style="margin-bottom:16px;">
-                <label style="display:block;font-weight:500;color:var(--text-secondary);margin-bottom:6px;">🌓 外观模式</label>
-                <div style="display:flex;gap:10px;">
-                    <button class="theme-btn ${!isDark ? 'active' : ''}" data-theme="light" style="flex:1;padding:8px;border-radius:var(--radius-full);background:${!isDark ? 'var(--brand-start)' : 'var(--bg-card)'};color:${!isDark ? '#fff' : 'var(--text-secondary)'};border:1px solid var(--border-subtle);cursor:pointer;">☀️ 浅色</button>
-                    <button class="theme-btn ${isDark ? 'active' : ''}" data-theme="dark" style="flex:1;padding:8px;border-radius:var(--radius-full);background:${isDark ? 'var(--brand-start)' : 'var(--bg-card)'};color:${isDark ? '#fff' : 'var(--text-secondary)'};border:1px solid var(--border-subtle);cursor:pointer;">🌙 深色</button>
-                </div>
-            </div>
-            <div style="margin-bottom:16px;padding-top:16px;border-top:1px solid var(--border-subtle);">
-                <h4 style="color:var(--text-primary);font-weight:600;margin-bottom:8px;">📋 更新日志</h4>
-                <div id="changelogList"></div>
-            </div>
-            ${(isOwner || currentUserRole === 'owner') ? `
-            <div style="padding-top:16px;border-top:1px solid var(--border-subtle);">
-                <h4 style="color:var(--text-primary);font-weight:600;margin-bottom:8px;">🛡️ 管理后台</h4>
-                <button class="btn-main" id="adminEntryBtn" style="width:auto;padding:8px 24px;">进入管理后台</button>
-                <div id="adminContent" style="margin-top:12px;"></div>
-            </div>
-            ` : ''}
-        </div>
-    `;
-
-    // 主题切换
-    document.querySelectorAll('.theme-btn').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            var theme = this.dataset.theme;
-            var settings = loadSettings();
-            settings.theme = theme;
-            saveSettings(settings);
-            applySettings();
-            renderSettingsView();
-        });
-    });
-
-    // 更新日志
-    loadChangelog();
-
-    // 管理后台（仅站主）
-    var adminBtn = document.getElementById('adminEntryBtn');
-    if (adminBtn) {
-        adminBtn.addEventListener('click', function() {
-            var content = document.getElementById('adminContent');
-            if (content.style.display === 'block') {
-                content.style.display = 'none';
-                this.textContent = '进入管理后台';
-            } else {
-                content.style.display = 'block';
-                this.textContent = '收起管理后台';
-                loadAdmin('dashboard');
-            }
-        });
-    }
-}
-
-async function loadChangelog() {
-    var supabase = getSupabase();
-    var { data, error } = await supabase.from('version_logs').select('*').order('published_at', { ascending: false });
-    if (error) { console.error(error); return; }
-    var wrap = document.getElementById('changelogList');
-    if (!wrap) return;
-    if (!data || data.length === 0) {
-        wrap.innerHTML = '<div style="color:var(--text-secondary);padding:10px;text-align:center;">暂无更新记录</div>';
-        return;
-    }
-    var html = '';
-    data.forEach(function(item) {
-        var majorBadge = item.is_major ? ' <span style="background:#D4AF37;color:#222;padding:2px 10px;border-radius:var(--radius-full);font-size:0.6rem;font-weight:700;margin-left:8px;">🎉 重大更新</span>' : '';
-        var contentHtml = item.content ? item.content.replace(/\n/g, '<br>') : '';
-        html += `
-            <div style="background:var(--bg-card);border-radius:var(--radius-sm);padding:12px 16px;margin-bottom:8px;border-left:4px solid var(--brand-start);">
-                <div><span style="font-weight:700;color:var(--brand-start);">${item.version}</span><span style="font-size:0.8rem;color:var(--text-muted);margin-left:10px;">${new Date(item.published_at).toLocaleDateString('zh-CN')}</span>${majorBadge}</div>
-                ${item.title ? '<div style="font-weight:600;margin:4px 0;">' + item.title + '</div>' : ''}
-                <div style="font-size:0.9rem;color:var(--text-secondary);margin-top:4px;">${contentHtml}</div>
-            </div>
-        `;
-    });
-    wrap.innerHTML = html;
-}
-
-// ---------- 管理后台 ----------
-async function loadAdmin(tab) {
-    if (!isOwner && currentUserRole !== 'owner') { toast('权限不足'); return; }
-    var wrap = document.getElementById('adminContent');
-    if (!wrap) return;
-    var supabase = getSupabase();
-
-    // 概况
-    if (tab === 'dashboard') {
-        Promise.all([
-            supabase.from('profiles').select('id', { count: 'exact' }),
-            supabase.from('dynamics').select('id', { count: 'exact' }),
-            supabase.from('messages').select('id', { count: 'exact' }),
-            supabase.from('class_members').select('user_email'),
-            supabase.from('user_stats').select('level')
-        ]).then(function(res) {
-            var userCount = res[0].count || 0;
-            var dynCount = res[1].count || 0;
-            var msgCount = res[2].count || 0;
-            var members = res[3].data || [];
-            var stats = res[4].data || [];
-            var avgLevel = 0;
-            if (stats.length > 0) {
-                var sum = stats.reduce(function(a, b) { return a + (b.level || 1); }, 0);
-                avgLevel = Math.round(sum / stats.length * 10) / 10;
-            }
-            var html = '<div class="admin-stats">' +
-                '<div class="admin-stat-card"><div class="num">' + userCount + '</div><div class="label">总用户</div></div>' +
-                '<div class="admin-stat-card"><div class="num">' + dynCount + '</div><div class="label">总动态</div></div>' +
-                '<div class="admin-stat-card"><div class="num">' + msgCount + '</div><div class="label">总消息</div></div>' +
-                '<div class="admin-stat-card"><div class="num">' + avgLevel + '</div><div class="label">平均等级</div></div>' +
-                '</div>';
-            wrap.innerHTML = html;
-        });
-        return;
-    }
-
-    // 用户列表
-    if (tab === 'users') {
-        var { data: profiles } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
-        if (!profiles) return;
-        var html = '<table class="admin-table"><tr><th>昵称</th><th>邮箱</th><th>角色</th></tr>';
-        profiles.forEach(function(u) {
-            var role = u.role || 'student';
-            var roleDisplay = role === 'owner' ? '⭐ 站主' : role === 'teacher' ? '🎓 教师' : '👤 学生';
-            html += '<tr><td>' + (u.nickname || '未命名') + '</td><td>' + u.email + '</td><td>' + roleDisplay + '</td></tr>';
-        });
-        html += '</table>';
-        wrap.innerHTML = html;
-        return;
-    }
-
-    // 动态管理
-    if (tab === 'dynamics') {
-        var { data: dyns } = await supabase.from('dynamics').select('*').order('created_at', { ascending: false }).limit(50);
-        if (!dyns) return;
-        var html = '<table class="admin-table"><tr><th>内容</th><th>作者</th><th>时间</th></tr>';
-        dyns.forEach(function(d) {
-            html += '<tr><td>' + (d.text || '').slice(0, 30) + '...</td><td>' + d.nickname + '</td><td>' + new Date(d.created_at).toLocaleString() + '</td></tr>';
-        });
-        html += '</table>';
-        wrap.innerHTML = html;
-        return;
-    }
-
-    // 默认
-    wrap.innerHTML = '<div style="color:var(--text-secondary);padding:20px;text-align:center;">选择左侧选项卡</div>';
-}
-// ================================================================
-//  第 3 段：动态发布完整功能 + 消息系统 + AI + 群聊
-// ================================================================
 
 // ---------- 动态发布完整功能（含多图 + 进度条） ----------
 function bindPublish() {
@@ -1386,11 +1153,56 @@ function bindDynamicEvents() {
     document.querySelectorAll('.comment-toggle').forEach(function(el) {
         el.onclick = function(e) { e.stopPropagation(); var id = this.dataset.id; var wrap = document.querySelector('.comment-wrap[data-cmid="' + id + '"]'); if (wrap.classList.contains('hidden')) { wrap.classList.remove('hidden'); loadComments(id); } else { wrap.classList.add('hidden'); } };
     });
+    // 点赞/收藏动画（修复⑪）
     document.querySelectorAll('.like-btn').forEach(function(el) {
-        el.onclick = function(e) { e.stopPropagation(); var id = this.dataset.id; var supabase = getSupabase(); supabase.from('likes').select('id').eq('dyn_id', id).eq('user_email', currentUser.email).then(function(res) { if (res.data && res.data.length > 0) { toast('已点过赞'); return; } supabase.from('likes').insert({ dyn_id: id, user_email: currentUser.email, class_id: currentClassId }).then(function() { supabase.from('dynamics').select('like_count').eq('id', id).then(function(r) { var count = (r.data && r.data[0] ? r.data[0].like_count : 0) + 1; supabase.from('dynamics').update({ like_count: count }).eq('id', id).then(function() { loadDynamics(true); var btn = document.querySelector('.like-btn[data-id="' + id + '"] i'); if (btn) { btn.parentElement.classList.add('liked'); } toast('👍 点赞成功'); addExp(currentUser.email, 10, '收到点赞'); }); }); }); }); };
+        el.onclick = function(e) {
+            e.stopPropagation();
+            var id = this.dataset.id;
+            var supabase = getSupabase();
+            supabase.from('likes').select('id').eq('dyn_id', id).eq('user_email', currentUser.email).then(function(res) {
+                if (res.data && res.data.length > 0) {
+                    toast('已点过赞');
+                    return;
+                }
+                supabase.from('likes').insert({ dyn_id: id, user_email: currentUser.email, class_id: currentClassId }).then(function() {
+                    supabase.from('dynamics').select('like_count').eq('id', id).then(function(r) {
+                        var count = (r.data && r.data[0] ? r.data[0].like_count : 0) + 1;
+                        supabase.from('dynamics').update({ like_count: count }).eq('id', id).then(function() {
+                            loadDynamics(true);
+                            var btn = document.querySelector('.like-btn[data-id="' + id + '"] i');
+                            if (btn) { btn.parentElement.classList.add('liked'); }
+                            toast('👍 点赞成功');
+                            addExp(currentUser.email, 10, '收到点赞');
+                        });
+                    });
+                });
+            });
+        };
     });
     document.querySelectorAll('.collect-btn').forEach(function(el) {
-        el.onclick = function(e) { e.stopPropagation(); var id = this.dataset.id; var supabase = getSupabase(); supabase.from('collects').select('id').eq('dyn_id', id).eq('user_email', currentUser.email).then(function(res) { if (res.data && res.data.length > 0) { toast('已收藏过'); return; } supabase.from('collects').insert({ dyn_id: id, user_email: currentUser.email, class_id: currentClassId }).then(function() { supabase.from('dynamics').select('collect_count').eq('id', id).then(function(r) { var count = (r.data && r.data[0] ? r.data[0].collect_count : 0) + 1; supabase.from('dynamics').update({ collect_count: count }).eq('id', id).then(function() { loadDynamics(true); var btn = document.querySelector('.collect-btn[data-id="' + id + '"] i'); if (btn) { btn.parentElement.classList.add('collected'); } toast('🔖 收藏成功'); addExp(currentUser.email, 10, '收到收藏'); }); }); }); }); };
+        el.onclick = function(e) {
+            e.stopPropagation();
+            var id = this.dataset.id;
+            var supabase = getSupabase();
+            supabase.from('collects').select('id').eq('dyn_id', id).eq('user_email', currentUser.email).then(function(res) {
+                if (res.data && res.data.length > 0) {
+                    toast('已收藏过');
+                    return;
+                }
+                supabase.from('collects').insert({ dyn_id: id, user_email: currentUser.email, class_id: currentClassId }).then(function() {
+                    supabase.from('dynamics').select('collect_count').eq('id', id).then(function(r) {
+                        var count = (r.data && r.data[0] ? r.data[0].collect_count : 0) + 1;
+                        supabase.from('dynamics').update({ collect_count: count }).eq('id', id).then(function() {
+                            loadDynamics(true);
+                            var btn = document.querySelector('.collect-btn[data-id="' + id + '"] i');
+                            if (btn) { btn.parentElement.classList.add('collected'); }
+                            toast('🔖 收藏成功');
+                            addExp(currentUser.email, 10, '收到收藏');
+                        });
+                    });
+                });
+            });
+        };
     });
     document.querySelectorAll('.reaction-toggle').forEach(function(el) {
         el.onclick = function(e) { e.stopPropagation(); var id = this.dataset.id; showDynReactionPicker(e, id); };
@@ -1449,6 +1261,535 @@ async function addDynReaction(dynId, emoji) {
     reactions[emoji] += 1;
     await supabase.from('dynamics').update({ reactions: JSON.stringify(reactions) }).eq('id', dynId);
     loadDynamics(true);
+}
+// ================================================================
+//  第二段：消息系统 + AI + 群聊 + 个人中心 + 设置 + 管理后台 + 其他功能 + 初始化
+// ================================================================
+
+// ---------- 个人中心 ----------
+function showProfile() {
+    document.getElementById('view-home').classList.remove('active');
+    document.getElementById('view-class').classList.remove('active');
+    document.getElementById('view-settings').classList.remove('active');
+    document.getElementById('view-profile').classList.add('active');
+    document.getElementById('homeTopLeft').classList.remove('hidden');
+    document.getElementById('classTopLeft').classList.add('hidden');
+    document.getElementById('navMainItems').classList.remove('hidden');
+    document.getElementById('navClassItems').classList.add('hidden');
+    document.querySelectorAll('#navMainItems .nav-item').forEach(function(item) {
+        item.classList.remove('active');
+        if (item.dataset.tab === 'profile') item.classList.add('active');
+    });
+    renderProfileContent();
+}
+
+function renderProfileContent() {
+    var container = document.getElementById('profileContent');
+    if (!currentUser) return;
+    var stats = currentUser.stats || { level: 1, exp: 0, total_exp: 0, points: 0, login_streak: 0 };
+    var levelInfo = getLevelInfo(stats.exp || 0);
+    var roleTag = currentUserRole === 'owner' ? '⭐ 站主' : currentUserRole === 'teacher' ? '🎓 教师' : '👤 学生';
+
+    container.innerHTML = `
+        <div class="panel">
+            <h3>👤 个人资料</h3>
+            <div style="display:flex;align-items:center;gap:20px;margin:16px 0;flex-wrap:wrap;">
+                <img class="avatar" src="${currentUser.avatar || getDefaultAvatarSVG('👤')}" style="width:80px;height:80px;border-radius:50%;border:1px solid var(--border-subtle);">
+                <div>
+                    <div style="font-size:1.3rem;font-weight:600;">${currentUser.nickname}</div>
+                    <div style="color:var(--text-secondary);">${currentUser.sign || '这个人很懒，什么也没有留下~'}</div>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;">
+                        <span class="level-badge ${getLevelBadgeClass(levelInfo.level)}" style="display:inline-flex;align-items:center;justify-content:center;border-radius:50%;width:34px;height:34px;font-weight:700;font-size:0.7rem;">Lv.${levelInfo.level}</span>
+                        <span style="font-size:0.9rem;color:var(--text-secondary);">${levelInfo.title}</span>
+                        <span style="background:var(--brand-start);color:#fff;padding:2px 12px;border-radius:var(--radius-full);font-size:0.7rem;">${roleTag}</span>
+                    </div>
+                </div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:10px;background:var(--bg-card);padding:14px;border-radius:var(--radius-sm);margin-bottom:16px;">
+                <div><span style="color:var(--text-secondary);font-size:0.8rem;">经验</span><br><span style="font-weight:700;font-size:1.1rem;">${stats.exp || 0}</span></div>
+                <div><span style="color:var(--text-secondary);font-size:0.8rem;">下一级</span><br><span style="font-weight:700;font-size:1.1rem;">${levelInfo.nextExp || 0}</span></div>
+                <div><span style="color:var(--text-secondary);font-size:0.8rem;">积分</span><br><span style="font-weight:700;font-size:1.1rem;color:#D4AF37;">${stats.points || 0}</span></div>
+                <div><span style="color:var(--text-secondary);font-size:0.8rem;">连续签到</span><br><span style="font-weight:700;font-size:1.1rem;">${stats.login_streak || 0}</span> 天</div>
+            </div>
+            <div class="view-line">邮箱：${currentUser.email}</div>
+            <div class="view-line">星座：${currentUser.profile?.star || '未填写'}</div>
+            <div class="view-line">生日：${currentUser.profile?.birth || '未填写'}</div>
+            <div class="view-line">身高：${currentUser.profile?.height || '秘密'}</div>
+            <div class="view-line">体重：${currentUser.profile?.weight || '秘密'}</div>
+            <div style="margin-top:20px;border-top:1px solid var(--border-subtle);padding-top:16px;">
+                <h4 style="color:var(--text-primary);font-weight:700;">🏆 我的成就</h4>
+                <div id="achievementList" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;"></div>
+            </div>
+            <div style="margin-top:20px;border-top:1px solid var(--border-subtle);padding-top:16px;">
+                <h4 style="color:var(--text-primary);font-weight:700;">🎨 头像框/挂件</h4>
+                <div id="userEquippedItems" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;"></div>
+            </div>
+        </div>
+    `;
+    // 加载成就
+    computeAchievements(currentUser.email).then(function(ach) {
+        var wrap = document.getElementById('achievementList');
+        if (!wrap) return;
+        if (ach.length === 0) { wrap.innerHTML = '<div style="color:var(--text-secondary);font-size:0.9rem;">暂无成就</div>'; return; }
+        wrap.innerHTML = ach.map(function(a) {
+            return '<div style="display:inline-block;font-size:1.5rem;text-align:center;padding:8px;background:var(--bg-card);border-radius:var(--radius-sm);min-width:60px;margin:4px;border:2px solid #D4AF37;"><div>' + a.label + '</div><div style="font-size:0.6rem;color:var(--text-secondary);">' + a.desc + '</div></div>';
+        }).join('');
+    });
+    loadEquippedItems();
+}
+
+async function computeAchievements(email) {
+    var supabase = getSupabase();
+    var { data: dyns } = await supabase.from('dynamics').select('id', { count: 'exact' }).eq('user_email', email);
+    var dynCount = dyns ? dyns.length : 0;
+    var { data: likes } = await supabase.from('likes').select('id', { count: 'exact' }).eq('user_email', email);
+    var likeCount = likes ? likes.length : 0;
+    var { data: collects } = await supabase.from('collects').select('id', { count: 'exact' }).eq('user_email', email);
+    var collectCount = collects ? collects.length : 0;
+    var ach = [];
+    if (dynCount >= 5) ach.push({ label: '📝 初露锋芒', desc: '发布5条动态' });
+    if (dynCount >= 20) ach.push({ label: '🔥 动态达人', desc: '发布20条动态' });
+    if (likeCount >= 10) ach.push({ label: '👍 小有名气', desc: '获得10个点赞' });
+    if (likeCount >= 50) ach.push({ label: '⭐ 班级明星', desc: '获得50个点赞' });
+    if (collectCount >= 5) ach.push({ label: '🔖 收藏家', desc: '收藏5条动态' });
+    var stats = currentUser.stats || {};
+    if (stats.login_streak >= 7) ach.push({ label: '📆 一周之约', desc: '连续登录7天' });
+    if (stats.login_streak >= 30) ach.push({ label: '🌙 满月打卡', desc: '连续登录30天' });
+    if (stats.level >= 5) ach.push({ label: '🌟 班级达人', desc: '等级达到Lv.5' });
+    if (stats.level >= 10) ach.push({ label: '👑 超凡之上', desc: '等级达到Lv.10' });
+    return ach;
+}
+
+// ---------- 设置 ----------
+function showSettings() {
+    document.getElementById('view-home').classList.remove('active');
+    document.getElementById('view-class').classList.remove('active');
+    document.getElementById('view-profile').classList.remove('active');
+    document.getElementById('view-settings').classList.add('active');
+    document.getElementById('homeTopLeft').classList.remove('hidden');
+    document.getElementById('classTopLeft').classList.add('hidden');
+    document.getElementById('navMainItems').classList.remove('hidden');
+    document.getElementById('navClassItems').classList.add('hidden');
+    document.querySelectorAll('#navMainItems .nav-item').forEach(function(item) {
+        item.classList.remove('active');
+        if (item.dataset.tab === 'settings') item.classList.add('active');
+    });
+    renderSettingsView();
+}
+
+function renderSettingsView() {
+    var container = document.getElementById('settingsContent');
+    var settings = loadSettings();
+    var isDark = !settings.theme || settings.theme === 'dark' || settings.theme === 'auto';
+
+    container.innerHTML = `
+        <div class="panel">
+            <h3>⚙️ 设置</h3>
+            <div style="margin-bottom:16px;">
+                <label style="display:block;font-weight:500;color:var(--text-secondary);margin-bottom:6px;">🌓 外观模式</label>
+                <div style="display:flex;gap:10px;">
+                    <button class="theme-btn ${!isDark ? 'active' : ''}" data-theme="light" style="flex:1;padding:8px;border-radius:var(--radius-full);background:${!isDark ? 'var(--brand-start)' : 'var(--bg-card)'};color:${!isDark ? '#fff' : 'var(--text-secondary)'};border:1px solid var(--border-subtle);cursor:pointer;">☀️ 浅色</button>
+                    <button class="theme-btn ${isDark ? 'active' : ''}" data-theme="dark" style="flex:1;padding:8px;border-radius:var(--radius-full);background:${isDark ? 'var(--brand-start)' : 'var(--bg-card)'};color:${isDark ? '#fff' : 'var(--text-secondary)'};border:1px solid var(--border-subtle);cursor:pointer;">🌙 深色</button>
+                </div>
+            </div>
+            <div style="margin-bottom:16px;padding-top:16px;border-top:1px solid var(--border-subtle);">
+                <h4 style="color:var(--text-primary);font-weight:600;margin-bottom:8px;">📋 更新日志</h4>
+                <div id="changelogList"></div>
+            </div>
+            ${(isOwner || currentUserRole === 'owner') ? `
+            <div style="padding-top:16px;border-top:1px solid var(--border-subtle);">
+                <h4 style="color:var(--text-primary);font-weight:600;margin-bottom:8px;">🛡️ 管理后台</h4>
+                <button class="btn-main" id="adminEntryBtn" style="width:auto;padding:8px 24px;">进入管理后台</button>
+                <div id="adminContent" style="margin-top:12px;"></div>
+            </div>
+            ` : ''}
+        </div>
+    `;
+
+    // 主题切换
+    document.querySelectorAll('.theme-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var theme = this.dataset.theme;
+            var settings = loadSettings();
+            settings.theme = theme;
+            saveSettings(settings);
+            applySettings();
+            renderSettingsView();
+        });
+    });
+
+    // 更新日志
+    loadChangelog();
+
+    // 管理后台（仅站主）
+    var adminBtn = document.getElementById('adminEntryBtn');
+    if (adminBtn) {
+        adminBtn.addEventListener('click', function() {
+            var content = document.getElementById('adminContent');
+            if (content.style.display === 'block') {
+                content.style.display = 'none';
+                this.textContent = '进入管理后台';
+            } else {
+                content.style.display = 'block';
+                this.textContent = '收起管理后台';
+                loadAdmin('dashboard');
+            }
+        });
+    }
+}
+
+async function loadChangelog() {
+    var supabase = getSupabase();
+    var { data, error } = await supabase.from('version_logs').select('*').order('published_at', { ascending: false });
+    if (error) { console.error(error); return; }
+    var wrap = document.getElementById('changelogList');
+    if (!wrap) return;
+    if (!data || data.length === 0) {
+        wrap.innerHTML = '<div style="color:var(--text-secondary);padding:10px;text-align:center;">暂无更新记录</div>';
+        return;
+    }
+    var html = '';
+    data.forEach(function(item) {
+        var majorBadge = item.is_major ? ' <span style="background:#D4AF37;color:#222;padding:2px 10px;border-radius:var(--radius-full);font-size:0.6rem;font-weight:700;margin-left:8px;">🎉 重大更新</span>' : '';
+        var contentHtml = item.content ? item.content.replace(/\n/g, '<br>') : '';
+        html += `
+            <div style="background:var(--bg-card);border-radius:var(--radius-sm);padding:12px 16px;margin-bottom:8px;border-left:4px solid var(--brand-start);">
+                <div><span style="font-weight:700;color:var(--brand-start);">${item.version}</span><span style="font-size:0.8rem;color:var(--text-muted);margin-left:10px;">${new Date(item.published_at).toLocaleDateString('zh-CN')}</span>${majorBadge}</div>
+                ${item.title ? '<div style="font-weight:600;margin:4px 0;">' + item.title + '</div>' : ''}
+                <div style="font-size:0.9rem;color:var(--text-secondary);margin-top:4px;">${contentHtml}</div>
+            </div>
+        `;
+    });
+    wrap.innerHTML = html;
+}
+
+// ---------- 管理后台 ----------
+async function loadAdmin(tab) {
+    if (!isOwner && currentUserRole !== 'owner') { toast('权限不足'); return; }
+    var wrap = document.getElementById('adminContent');
+    if (!wrap) return;
+    var supabase = getSupabase();
+
+    // 概况
+    if (tab === 'dashboard') {
+        Promise.all([
+            supabase.from('profiles').select('id', { count: 'exact' }),
+            supabase.from('dynamics').select('id', { count: 'exact' }),
+            supabase.from('messages').select('id', { count: 'exact' }),
+            supabase.from('class_members').select('user_email'),
+            supabase.from('user_stats').select('level')
+        ]).then(function(res) {
+            var userCount = res[0].count || 0;
+            var dynCount = res[1].count || 0;
+            var msgCount = res[2].count || 0;
+            var members = res[3].data || [];
+            var stats = res[4].data || [];
+            var avgLevel = 0;
+            if (stats.length > 0) {
+                var sum = stats.reduce(function(a, b) { return a + (b.level || 1); }, 0);
+                avgLevel = Math.round(sum / stats.length * 10) / 10;
+            }
+            var html = '<div class="admin-stats">' +
+                '<div class="admin-stat-card"><div class="num">' + userCount + '</div><div class="label">总用户</div></div>' +
+                '<div class="admin-stat-card"><div class="num">' + dynCount + '</div><div class="label">总动态</div></div>' +
+                '<div class="admin-stat-card"><div class="num">' + msgCount + '</div><div class="label">总消息</div></div>' +
+                '<div class="admin-stat-card"><div class="num">' + avgLevel + '</div><div class="label">平均等级</div></div>' +
+                '</div>';
+            wrap.innerHTML = html;
+        });
+        return;
+    }
+
+    // 用户列表
+    if (tab === 'users') {
+        var { data: profiles } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
+        if (!profiles) return;
+        var html = '<table class="admin-table"><tr><th>昵称</th><th>邮箱</th><th>角色</th></tr>';
+        profiles.forEach(function(u) {
+            var role = u.role || 'student';
+            var roleDisplay = role === 'owner' ? '⭐ 站主' : role === 'teacher' ? '🎓 教师' : '👤 学生';
+            html += '<tr><td>' + (u.nickname || '未命名') + '</td><td>' + u.email + '</td><td>' + roleDisplay + '</td></tr>';
+        });
+        html += '</table>';
+        wrap.innerHTML = html;
+        return;
+    }
+
+    // 动态管理
+    if (tab === 'dynamics') {
+        var { data: dyns } = await supabase.from('dynamics').select('*').order('created_at', { ascending: false }).limit(50);
+        if (!dyns) return;
+        var html = '<table class="admin-table"><tr><th>内容</th><th>作者</th><th>时间</th></tr>';
+        dyns.forEach(function(d) {
+            html += '<tr><td>' + (d.text || '').slice(0, 30) + '...</td><td>' + d.nickname + '</td><td>' + new Date(d.created_at).toLocaleString() + '</td></tr>';
+        });
+        html += '</table>';
+        wrap.innerHTML = html;
+        return;
+    }
+
+    // 默认
+    wrap.innerHTML = '<div style="color:var(--text-secondary);padding:20px;text-align:center;">选择左侧选项卡</div>';
+}
+
+// ---------- 设置系统 ----------
+function saveSettings(settings) { localStorage.setItem('blog_settings', JSON.stringify(settings)); }
+function loadSettings() { try { return JSON.parse(localStorage.getItem('blog_settings')) || {}; } catch (e) { return {}; } }
+
+function applySettings() {
+    var settings = loadSettings();
+    var root = document.documentElement;
+    var theme = settings.theme || 'dark';
+    if (!settings.theme) {
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        theme = prefersDark ? 'dark' : 'light';
+        settings.theme = theme;
+        saveSettings(settings);
+    }
+    if (theme === 'dark') {
+        root.setAttribute('data-theme', 'dark');
+    } else {
+        root.setAttribute('data-theme', 'light');
+    }
+}
+
+// ---------- 子页面内容加载（修复③④⑤） ----------
+function loadClassContent(tab) {
+    var container = document.getElementById('classSpaceContent');
+    if (!container) return;
+    switch(tab) {
+        case 'dynamic':
+            container.innerHTML = `
+                <div class="panel">
+                    <h3>📝 发布动态</h3>
+                    <div class="publish-area-wrapper">
+                        <textarea id="publishText" placeholder="分享你的想法..." maxlength="500" style="width:100%;min-height:80px;padding:12px;padding-bottom:48px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-card);backdrop-filter:blur(var(--glass-blur));resize:vertical;color:var(--text-primary);transition:var(--transition);"></textarea>
+                        <button class="emoji-btn" id="pubEmojiBtn">😊</button>
+                        <div class="publish-counter" id="publishCounter" style="text-align:right;font-size:0.8rem;color:var(--text-muted);margin-top:4px;">0 / 500</div>
+                    </div>
+                    <div id="publishPreviewContainer" class="image-preview-list" style="display:none;"></div>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0;">
+                        <input id="publishTags" placeholder="标签（用逗号分隔，如 #学习,#日常）" style="flex:1;padding:8px 12px;border:1px solid var(--border-subtle);border-radius:var(--radius-full);background:var(--bg-card);color:var(--text-primary);font-size:0.85rem;">
+                    </div>
+                    <div class="media-select" style="margin:8px 0;">
+                        <input type="file" accept="image/*,video/*" id="publishMedia" style="font-size:0.85rem;" multiple>
+                        <div class="upload-progress" id="uploadProgress" style="display:none;"><div class="bar" id="uploadBar"></div></div>
+                    </div>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                        <button class="btn-main" style="width:auto;padding:8px 28px;" id="sendDynamic">发布</button>
+                        <button class="btn-outline" style="padding:8px 18px;" id="saveDraftBtn">💾 保存草稿</button>
+                    </div>
+                </div>
+                <div class="panel">
+                    <h3>📰 全部动态</h3>
+                    <div id="dynamicList"></div>
+                    <div id="loadMoreTrigger" style="text-align:center;padding:12px;color:var(--text-secondary);font-size:0.9rem;cursor:pointer;display:none;" onclick="loadDynamics(false)">加载更多...</div>
+                </div>
+            `;
+            bindPublish();
+            loadDynamics(true);
+            break;
+        case 'messages':
+            container.innerHTML = `
+                <div class="panel" style="padding:0;overflow:hidden;">
+                    <div class="msg-page">
+                        <div class="msg-contact-list" id="msgContactList">
+                            <div style="padding:12px;border-bottom:1px solid var(--border-subtle);display:flex;gap:8px;flex-wrap:wrap;">
+                                <button class="btn-sm" id="createGroupBtn2"><i class="fa fa-plus"></i> 建群</button>
+                                <button class="btn-sm" id="treeholeEntryBtn"><i class="fa fa-commenting-o"></i> 树洞</button>
+                                <button class="btn-sm" id="checkinBtn"><i class="fa fa-calendar-check-o"></i> 签到</button>
+                            </div>
+                            <div id="contactItems"></div>
+                        </div>
+                        <div class="msg-chat-area" id="msgChatArea">
+                            <div class="msg-chat-header" id="msgChatHeader">
+                                <span id="chatTargetName">请选择联系人</span>
+                                <div style="display:flex;align-items:center;gap:8px;">
+                                    <span style="font-size:0.8rem;color:var(--text-secondary);" id="chatTargetStatus"></span>
+                                    <button class="btn-sm" id="groupManageBtn" style="display:none;font-size:0.7rem;padding:4px 12px;"><i class="fa fa-cog"></i> 管理</button>
+                                </div>
+                            </div>
+                            <div class="msg-chat-messages" id="msgChatMessages"><div style="text-align:center;color:var(--text-muted);padding:40px 0;">点击左侧联系人开始聊天</div></div>
+                            <div class="msg-chat-input" id="msgChatInput">
+                                <button class="emoji-btn" id="chatEmojiBtn">😊</button>
+                                <input id="chatInput" placeholder="输入消息... @DSAI 可提问">
+                                <button id="chatSendBtn"><i class="fa fa-send"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            loadContactList();
+            bindChatInput();
+            break;
+        case 'notice':
+            container.innerHTML = `
+                <div class="panel">
+                    <h3>📢 通知 <button class="btn-sm" id="newNoticeBtn"><i class="fa fa-plus"></i> 发布通知</button></h3>
+                    <div id="noticeList"></div>
+                </div>
+            `;
+            loadNotice();
+            break;
+        case 'functions':
+            container.innerHTML = `
+                <div class="panel">
+                    <h3>🧩 功能</h3>
+                    <div class="func-tabs" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+                        <button class="func-tab active" data-func="polls" style="padding:6px 18px;border-radius:var(--radius-full);background:var(--brand-start);color:#fff;border:none;cursor:pointer;font-size:0.9rem;">投票</button>
+                        <button class="func-tab" data-func="docs" style="padding:6px 18px;border-radius:var(--radius-full);background:var(--bg-card);color:var(--text-secondary);border:none;cursor:pointer;font-size:0.9rem;">在线文档</button>
+                        <button class="func-tab" data-func="calendar" style="padding:6px 18px;border-radius:var(--radius-full);background:var(--bg-card);color:var(--text-secondary);border:none;cursor:pointer;font-size:0.9rem;">班级日历</button>
+                        <button class="func-tab" data-func="album" style="padding:6px 18px;border-radius:var(--radius-full);background:var(--bg-card);color:var(--text-secondary);border:none;cursor:pointer;font-size:0.9rem;">班级相册</button>
+                    </div>
+                    <div class="func-content active" id="func-polls"><button class="btn-sm" id="newPollBtn"><i class="fa fa-plus"></i> 发起投票</button><div id="pollList" style="margin-top:12px;"></div></div>
+                    <div class="func-content" id="func-docs"><input id="docTitleInput" placeholder="文档标题" style="width:100%;padding:10px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-card);margin-bottom:8px;"><textarea id="docContentInput" rows="8" style="width:100%;padding:10px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-card);font-family:monospace;resize:vertical;"></textarea><button class="btn-sm" id="saveDocBtn"><i class="fa fa-save"></i> 保存文档</button><div id="docPreview" style="padding:12px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);margin-top:10px;background:var(--bg-card);"></div></div>
+                    <div class="func-content" id="func-calendar"><button class="btn-sm" id="addEventBtn"><i class="fa fa-plus"></i> 添加事件</button><div id="calendarList" style="margin-top:12px;"></div></div>
+                    <div class="func-content" id="func-album"><div id="albumGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;"></div></div>
+                </div>
+            `;
+            // 绑定功能切换
+            document.querySelectorAll('.func-tab').forEach(function(tab) {
+                tab.addEventListener('click', function() {
+                    document.querySelectorAll('.func-tab').forEach(function(t) { t.classList.remove('active'); });
+                    this.classList.add('active');
+                    document.querySelectorAll('.func-content').forEach(function(c) { c.classList.remove('active'); });
+                    var target = document.getElementById('func-' + this.dataset.func);
+                    if (target) target.classList.add('active');
+                    if (this.dataset.func === 'album') loadAlbum();
+                });
+            });
+            loadPolls();
+            loadDoc();
+            loadCalendar();
+            loadAlbum();
+            break;
+        case 'capsule':
+            container.innerHTML = `
+                <div class="panel">
+                    <h3>⏳ 时间胶囊 <button class="btn-sm" id="writeCapsuleBtn">✉️ 写一封信</button></h3>
+                    <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:16px;">写给未来的自己或同学，设置解锁日期，到时才能打开 💌</p>
+                    <div id="capsuleList"></div>
+                </div>
+            `;
+            loadCapsules();
+            break;
+        case 'timeline':
+            container.innerHTML = `
+                <div class="panel">
+                    <h3>📜 班级大事记 <button class="btn-sm" id="addTimelineBtn">➕ 添加事件</button></h3>
+                    <div id="timelineList"></div>
+                </div>
+            `;
+            loadTimeline();
+            break;
+        case 'destinations':
+            container.innerHTML = `
+                <div class="panel">
+                    <h3>🗺️ 同学去向登记 <button class="btn-sm" id="addDestinationBtn">📝 登记我的去向</button></h3>
+                    <div id="destinationList"></div>
+                </div>
+            `;
+            loadDestinations();
+            break;
+        case 'teacher':
+            container.innerHTML = `
+                <div class="panel panel-teacher">
+                    <h3>🎓 毕业寄语 <span style="font-size:0.8rem;font-weight:normal;color:var(--text-secondary);">来自老师们的祝福</span></h3>
+                    <div id="teacherMessageList"></div>
+                    <div id="teacherMessageForm" style="display:${(currentUserRole === 'teacher' || currentUserRole === 'owner') ? 'block' : 'none'};margin-top:16px;">
+                        <textarea id="teacherMessageInput" rows="4" placeholder="写下你对全班同学的毕业寄语..." style="width:100%;padding:12px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-card);backdrop-filter:blur(var(--glass-blur));color:var(--text-primary);resize:vertical;"></textarea>
+                        <div style="margin-top:8px;display:flex;gap:8px;">
+                            <button class="btn-main" style="width:auto;padding:8px 28px;" id="sendTeacherMessageBtn">发布寄语</button>
+                            <span style="font-size:0.8rem;color:var(--text-muted);align-self:center;">💡 教师可发布置顶寄语</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            loadTeacherMessages();
+            bindTeacherMessage();
+            break;
+        case 'myLike':
+            container.innerHTML = `<div class="panel"><h3>❤️ 我点赞的动态</h3><div id="myLikeList"></div></div>`;
+            loadMyLikes();
+            break;
+        case 'myCollect':
+            container.innerHTML = `<div class="panel"><h3>🔖 我收藏的动态</h3><div id="myCollectList"></div></div>`;
+            loadMyCollects();
+            break;
+        case 'treehole':
+            container.innerHTML = `
+                <div class="panel" style="padding:0;overflow:hidden;">
+                    <div class="msg-page">
+                        <div class="msg-contact-list" style="width:100%;border-right:none;">
+                            <div style="padding:12px;border-bottom:1px solid var(--border-subtle);display:flex;gap:8px;flex-wrap:wrap;">
+                                <button class="btn-sm" id="treeholeBackBtn"><i class="fa fa-arrow-left"></i> 返回消息</button>
+                            </div>
+                            <div id="treeholeMessages" style="padding:16px;"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            loadTreeholeChat();
+            document.getElementById('treeholeBackBtn').addEventListener('click', function() {
+                switchClassTab('messages');
+            });
+            break;
+        case 'admin':
+            if (isOwner || currentUserRole === 'owner') {
+                container.innerHTML = `<div class="panel"><h3>🛡️ 管理后台</h3><div id="adminContent"></div></div>`;
+                loadAdmin('dashboard');
+                // 绑定管理后台选项卡
+                document.querySelectorAll('.admin-tab').forEach(function(tab) {
+                    tab.addEventListener('click', function() {
+                        loadAdmin(this.dataset.tab);
+                    });
+                });
+            } else {
+                toast('权限不足');
+            }
+            break;
+        default:
+            container.innerHTML = '<div class="panel"><p style="color:var(--text-secondary);">功能开发中...</p></div>';
+    }
+    // 重新绑定模态框事件（针对新生成的按钮）
+    bindModalEvents();
+}
+
+// ---------- 我的点赞/收藏 ----------
+async function loadMyLikes() {
+    var supabase = getSupabase();
+    var { data, error } = await supabase.from('likes').select('dyn_id').eq('user_email', currentUser.email).eq('class_id', currentClassId);
+    if (error) { console.error(error); return; }
+    var wrap = document.getElementById('myLikeList');
+    if (!wrap) return;
+    if (!data || data.length === 0) {
+        wrap.innerHTML = '<div style="color:var(--text-secondary);padding:20px;">还没有点赞</div>';
+        return;
+    }
+    var dynIds = data.map(function(l) { return l.dyn_id; });
+    var { data: dyns } = await supabase.from('dynamics').select('*').in('id', dynIds).order('created_at', { ascending: false });
+    if (!dyns) return;
+    wrap.innerHTML = dyns.map(function(d) {
+        return '<div class="dynamic-item"><div class="user-head"><div><div class="nickname">' + d.nickname + '</div></div></div><div class="dynamic-text">' + (d.text || '') + '</div><div style="color:var(--text-secondary);font-size:0.8rem;">' + new Date(d.created_at).toLocaleString() + '</div></div>';
+    }).join('');
+}
+
+async function loadMyCollects() {
+    var supabase = getSupabase();
+    var { data, error } = await supabase.from('collects').select('dyn_id').eq('user_email', currentUser.email).eq('class_id', currentClassId);
+    if (error) { console.error(error); return; }
+    var wrap = document.getElementById('myCollectList');
+    if (!wrap) return;
+    if (!data || data.length === 0) {
+        wrap.innerHTML = '<div style="color:var(--text-secondary);padding:20px;">还没有收藏</div>';
+        return;
+    }
+    var dynIds = data.map(function(l) { return l.dyn_id; });
+    var { data: dyns } = await supabase.from('dynamics').select('*').in('id', dynIds).order('created_at', { ascending: false });
+    if (!dyns) return;
+    wrap.innerHTML = dyns.map(function(d) {
+        return '<div class="dynamic-item"><div class="user-head"><div><div class="nickname">' + d.nickname + '</div></div></div><div class="dynamic-text">' + (d.text || '') + '</div><div style="color:var(--text-secondary);font-size:0.8rem;">' + new Date(d.created_at).toLocaleString() + '</div></div>';
+    }).join('');
 }
 
 // ---------- 消息系统 ----------
@@ -2047,9 +2388,6 @@ async function callDeepSeekAPI(messages, deepThink, search) {
 async function callImageAPI(prompt) {
     return 'https://picsum.photos/seed/' + encodeURIComponent(prompt) + '/512/512';
 }
-// ================================================================
-//  第 4 段：群聊管理 + 其他功能 + 初始化
-// ================================================================
 
 // ---------- 群聊管理 ----------
 async function openCreateGroupModal() {
@@ -2299,39 +2637,12 @@ async function confirmGroupAnnounce() {
     loadGroupChat('group_' + currentManageGroupId);
 }
 
-function bindGroupManageButtons() {
-    var el;
-    el = document.getElementById('groupManageClose');
-    if (el) el.onclick = function() { document.getElementById('groupManageModal').style.display = 'none'; };
-    el = document.getElementById('groupAddMemberBtn');
-    if (el) el.onclick = addGroupMember;
-    el = document.getElementById('groupAddMemberCancel');
-    if (el) el.onclick = function() { document.getElementById('groupAddMemberModal').style.display = 'none'; };
-    el = document.getElementById('groupAddMemberConfirm');
-    if (el) el.onclick = confirmAddGroupMember;
-    el = document.getElementById('groupEditNameBtn');
-    if (el) el.onclick = editGroupName;
-    el = document.getElementById('groupEditNameCancel');
-    if (el) el.onclick = function() { document.getElementById('groupEditNameModal').style.display = 'none'; };
-    el = document.getElementById('groupEditNameConfirm');
-    if (el) el.onclick = confirmEditGroupName;
-    el = document.getElementById('groupSetAnnounceBtn');
-    if (el) el.onclick = setGroupAnnounce;
-    el = document.getElementById('groupAnnounceCancel');
-    if (el) el.onclick = function() { document.getElementById('groupAnnounceModal').style.display = 'none'; };
-    el = document.getElementById('groupAnnounceConfirm');
-    if (el) el.onclick = confirmGroupAnnounce;
-    el = document.getElementById('groupDissolveBtn');
-    if (el) el.onclick = function() { if (currentManageGroupId) dissolveGroup(currentManageGroupId); };
-}
-
 async function addGroupMember() {
     if (!currentManageGroupId) return;
     var supabase = getSupabase();
     var { data: group } = await supabase.from('groups').select('members').eq('id', currentManageGroupId).single();
     if (!group) { toast('群不存在'); return; }
     var existingMembers = group.members || [];
-    var quoted = existingMembers.map(function(e) { return "'" + e + "'"; }).join(',');
     var { data: allUsers } = await supabase.from('profiles').select('email, nickname, avatar, role');
     if (allUsers) {
         allUsers = allUsers.filter(function(u) { return existingMembers.indexOf(u.email) === -1; });
@@ -2381,7 +2692,6 @@ async function confirmAddGroupMember() {
     loadContactList();
 }
 
-// ---------- 加载群聊消息 ----------
 async function loadGroupChat(target) {
     var container = document.getElementById('msgChatMessages');
     if (!container) return;
@@ -2898,268 +3208,6 @@ function showVersionPopup(versionData) {
     modal.onclick = function(e) { if (e.target === modal) modal.style.display = 'none'; };
 }
 
-// ---------- 设置系统 ----------
-function saveSettings(settings) { localStorage.setItem('blog_settings', JSON.stringify(settings)); }
-function loadSettings() { try { return JSON.parse(localStorage.getItem('blog_settings')) || {}; } catch (e) { return {}; } }
-
-function applySettings() {
-    var settings = loadSettings();
-    var root = document.documentElement;
-    var theme = settings.theme || 'dark';
-    if (!settings.theme) {
-        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        theme = prefersDark ? 'dark' : 'light';
-        settings.theme = theme;
-        saveSettings(settings);
-    }
-    if (theme === 'dark') {
-        root.setAttribute('data-theme', 'dark');
-    } else {
-        root.setAttribute('data-theme', 'light');
-    }
-}
-
-// ---------- 子页面内容加载 ----------
-function loadClassContent(tab) {
-    var container = document.getElementById('classSpaceContent');
-    if (!container) return;
-    switch(tab) {
-        case 'dynamic':
-            container.innerHTML = `
-                <div class="panel">
-                    <h3>📝 发布动态</h3>
-                    <div class="publish-area-wrapper">
-                        <textarea id="publishText" placeholder="分享你的想法..." maxlength="500" style="width:100%;min-height:80px;padding:12px;padding-bottom:48px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-card);backdrop-filter:blur(var(--glass-blur));resize:vertical;color:var(--text-primary);transition:var(--transition);"></textarea>
-                        <button class="emoji-btn" id="pubEmojiBtn">😊</button>
-                        <div class="publish-counter" id="publishCounter" style="text-align:right;font-size:0.8rem;color:var(--text-muted);margin-top:4px;">0 / 500</div>
-                    </div>
-                    <div id="publishPreviewContainer" class="image-preview-list" style="display:none;"></div>
-                    <div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0;">
-                        <input id="publishTags" placeholder="标签（用逗号分隔，如 #学习,#日常）" style="flex:1;padding:8px 12px;border:1px solid var(--border-subtle);border-radius:var(--radius-full);background:var(--bg-card);color:var(--text-primary);font-size:0.85rem;">
-                    </div>
-                    <div class="media-select" style="margin:8px 0;">
-                        <input type="file" accept="image/*,video/*" id="publishMedia" style="font-size:0.85rem;" multiple>
-                        <div class="upload-progress" id="uploadProgress" style="display:none;"><div class="bar" id="uploadBar"></div></div>
-                    </div>
-                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                        <button class="btn-main" style="width:auto;padding:8px 28px;" id="sendDynamic">发布</button>
-                        <button class="btn-outline" style="padding:8px 18px;" id="saveDraftBtn">💾 保存草稿</button>
-                    </div>
-                </div>
-                <div class="panel">
-                    <h3>📰 全部动态</h3>
-                    <div id="dynamicList"></div>
-                    <div id="loadMoreTrigger" style="text-align:center;padding:12px;color:var(--text-secondary);font-size:0.9rem;cursor:pointer;display:none;" onclick="loadDynamics(false)">加载更多...</div>
-                </div>
-            `;
-            bindPublish();
-            loadDynamics(true);
-            break;
-        case 'messages':
-            container.innerHTML = `
-                <div class="panel" style="padding:0;overflow:hidden;">
-                    <div class="msg-page">
-                        <div class="msg-contact-list" id="msgContactList">
-                            <div style="padding:12px;border-bottom:1px solid var(--border-subtle);display:flex;gap:8px;flex-wrap:wrap;">
-                                <button class="btn-sm" id="createGroupBtn2"><i class="fa fa-plus"></i> 建群</button>
-                                <button class="btn-sm" id="treeholeEntryBtn"><i class="fa fa-commenting-o"></i> 树洞</button>
-                                <button class="btn-sm" id="checkinBtn"><i class="fa fa-calendar-check-o"></i> 签到</button>
-                            </div>
-                            <div id="contactItems"></div>
-                        </div>
-                        <div class="msg-chat-area" id="msgChatArea">
-                            <div class="msg-chat-header" id="msgChatHeader">
-                                <span id="chatTargetName">请选择联系人</span>
-                                <div style="display:flex;align-items:center;gap:8px;">
-                                    <span style="font-size:0.8rem;color:var(--text-secondary);" id="chatTargetStatus"></span>
-                                    <button class="btn-sm" id="groupManageBtn" style="display:none;font-size:0.7rem;padding:4px 12px;"><i class="fa fa-cog"></i> 管理</button>
-                                </div>
-                            </div>
-                            <div class="msg-chat-messages" id="msgChatMessages"><div style="text-align:center;color:var(--text-muted);padding:40px 0;">点击左侧联系人开始聊天</div></div>
-                            <div class="msg-chat-input" id="msgChatInput">
-                                <button class="emoji-btn" id="chatEmojiBtn">😊</button>
-                                <input id="chatInput" placeholder="输入消息... @DSAI 可提问">
-                                <button id="chatSendBtn"><i class="fa fa-send"></i></button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            loadContactList();
-            bindChatInput();
-            break;
-        case 'notice':
-            container.innerHTML = `
-                <div class="panel">
-                    <h3>📢 通知 <button class="btn-sm" id="newNoticeBtn"><i class="fa fa-plus"></i> 发布通知</button></h3>
-                    <div id="noticeList"></div>
-                </div>
-            `;
-            loadNotice();
-            break;
-        case 'functions':
-            container.innerHTML = `
-                <div class="panel">
-                    <h3>🧩 功能</h3>
-                    <div class="func-tabs" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
-                        <button class="func-tab active" data-func="polls" style="padding:6px 18px;border-radius:var(--radius-full);background:var(--brand-start);color:#fff;border:none;cursor:pointer;font-size:0.9rem;">投票</button>
-                        <button class="func-tab" data-func="docs" style="padding:6px 18px;border-radius:var(--radius-full);background:var(--bg-card);color:var(--text-secondary);border:none;cursor:pointer;font-size:0.9rem;">在线文档</button>
-                        <button class="func-tab" data-func="calendar" style="padding:6px 18px;border-radius:var(--radius-full);background:var(--bg-card);color:var(--text-secondary);border:none;cursor:pointer;font-size:0.9rem;">班级日历</button>
-                        <button class="func-tab" data-func="album" style="padding:6px 18px;border-radius:var(--radius-full);background:var(--bg-card);color:var(--text-secondary);border:none;cursor:pointer;font-size:0.9rem;">班级相册</button>
-                    </div>
-                    <div class="func-content active" id="func-polls"><button class="btn-sm" id="newPollBtn"><i class="fa fa-plus"></i> 发起投票</button><div id="pollList" style="margin-top:12px;"></div></div>
-                    <div class="func-content" id="func-docs"><input id="docTitleInput" placeholder="文档标题" style="width:100%;padding:10px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-card);margin-bottom:8px;"><textarea id="docContentInput" rows="8" style="width:100%;padding:10px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-card);font-family:monospace;resize:vertical;"></textarea><button class="btn-sm" id="saveDocBtn"><i class="fa fa-save"></i> 保存文档</button><div id="docPreview" style="padding:12px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);margin-top:10px;background:var(--bg-card);"></div></div>
-                    <div class="func-content" id="func-calendar"><button class="btn-sm" id="addEventBtn"><i class="fa fa-plus"></i> 添加事件</button><div id="calendarList" style="margin-top:12px;"></div></div>
-                    <div class="func-content" id="func-album"><div id="albumGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;"></div></div>
-                </div>
-            `;
-            // 绑定功能切换
-            document.querySelectorAll('.func-tab').forEach(function(tab) {
-                tab.addEventListener('click', function() {
-                    document.querySelectorAll('.func-tab').forEach(function(t) { t.classList.remove('active'); });
-                    this.classList.add('active');
-                    document.querySelectorAll('.func-content').forEach(function(c) { c.classList.remove('active'); });
-                    var target = document.getElementById('func-' + this.dataset.func);
-                    if (target) target.classList.add('active');
-                    if (this.dataset.func === 'album') loadAlbum();
-                });
-            });
-            loadPolls();
-            loadDoc();
-            loadCalendar();
-            loadAlbum();
-            break;
-        case 'capsule':
-            container.innerHTML = `
-                <div class="panel">
-                    <h3>⏳ 时间胶囊 <button class="btn-sm" id="writeCapsuleBtn">✉️ 写一封信</button></h3>
-                    <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:16px;">写给未来的自己或同学，设置解锁日期，到时才能打开 💌</p>
-                    <div id="capsuleList"></div>
-                </div>
-            `;
-            loadCapsules();
-            break;
-        case 'timeline':
-            container.innerHTML = `
-                <div class="panel">
-                    <h3>📜 班级大事记 <button class="btn-sm" id="addTimelineBtn">➕ 添加事件</button></h3>
-                    <div id="timelineList"></div>
-                </div>
-            `;
-            loadTimeline();
-            break;
-        case 'destinations':
-            container.innerHTML = `
-                <div class="panel">
-                    <h3>🗺️ 同学去向登记 <button class="btn-sm" id="addDestinationBtn">📝 登记我的去向</button></h3>
-                    <div id="destinationList"></div>
-                </div>
-            `;
-            loadDestinations();
-            break;
-        case 'teacher':
-            container.innerHTML = `
-                <div class="panel panel-teacher">
-                    <h3>🎓 毕业寄语 <span style="font-size:0.8rem;font-weight:normal;color:var(--text-secondary);">来自老师们的祝福</span></h3>
-                    <div id="teacherMessageList"></div>
-                    <div id="teacherMessageForm" style="display:${(currentUserRole === 'teacher' || currentUserRole === 'owner') ? 'block' : 'none'};margin-top:16px;">
-                        <textarea id="teacherMessageInput" rows="4" placeholder="写下你对全班同学的毕业寄语..." style="width:100%;padding:12px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-card);backdrop-filter:blur(var(--glass-blur));color:var(--text-primary);resize:vertical;"></textarea>
-                        <div style="margin-top:8px;display:flex;gap:8px;">
-                            <button class="btn-main" style="width:auto;padding:8px 28px;" id="sendTeacherMessageBtn">发布寄语</button>
-                            <span style="font-size:0.8rem;color:var(--text-muted);align-self:center;">💡 教师可发布置顶寄语</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-            loadTeacherMessages();
-            bindTeacherMessage();
-            break;
-        case 'myLike':
-            container.innerHTML = `<div class="panel"><h3>❤️ 我点赞的动态</h3><div id="myLikeList"></div></div>`;
-            // 加载我的点赞
-            loadMyLikes();
-            break;
-        case 'myCollect':
-            container.innerHTML = `<div class="panel"><h3>🔖 我收藏的动态</h3><div id="myCollectList"></div></div>`;
-            loadMyCollects();
-            break;
-        case 'treehole':
-            container.innerHTML = `
-                <div class="panel" style="padding:0;overflow:hidden;">
-                    <div class="msg-page">
-                        <div class="msg-contact-list" style="width:100%;border-right:none;">
-                            <div style="padding:12px;border-bottom:1px solid var(--border-subtle);display:flex;gap:8px;flex-wrap:wrap;">
-                                <button class="btn-sm" id="treeholeBackBtn"><i class="fa fa-arrow-left"></i> 返回消息</button>
-                            </div>
-                            <div id="treeholeMessages" style="padding:16px;"></div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            // 加载树洞消息
-            loadTreeholeChat();
-            document.getElementById('treeholeBackBtn').addEventListener('click', function() {
-                switchClassTab('messages');
-            });
-            break;
-        case 'admin':
-            if (isOwner || currentUserRole === 'owner') {
-                container.innerHTML = `<div class="panel"><h3>🛡️ 管理后台</h3><div id="adminContent"></div></div>`;
-                loadAdmin('dashboard');
-                // 绑定管理后台选项卡
-                document.querySelectorAll('.admin-tab').forEach(function(tab) {
-                    tab.addEventListener('click', function() {
-                        loadAdmin(this.dataset.tab);
-                    });
-                });
-            } else {
-                toast('权限不足');
-            }
-            break;
-        default:
-            container.innerHTML = '<div class="panel"><p style="color:var(--text-secondary);">功能开发中...</p></div>';
-    }
-    // 重新绑定模态框事件（针对新生成的按钮）
-    bindModalEvents();
-}
-
-// ---------- 我的点赞/收藏 ----------
-async function loadMyLikes() {
-    var supabase = getSupabase();
-    var { data, error } = await supabase.from('likes').select('dyn_id').eq('user_email', currentUser.email).eq('class_id', currentClassId);
-    if (error) { console.error(error); return; }
-    var wrap = document.getElementById('myLikeList');
-    if (!wrap) return;
-    if (!data || data.length === 0) {
-        wrap.innerHTML = '<div style="color:var(--text-secondary);padding:20px;">还没有点赞</div>';
-        return;
-    }
-    var dynIds = data.map(function(l) { return l.dyn_id; });
-    var { data: dyns } = await supabase.from('dynamics').select('*').in('id', dynIds).order('created_at', { ascending: false });
-    if (!dyns) return;
-    wrap.innerHTML = dyns.map(function(d) {
-        return '<div class="dynamic-item"><div class="user-head"><div><div class="nickname">' + d.nickname + '</div></div></div><div class="dynamic-text">' + (d.text || '') + '</div><div style="color:var(--text-secondary);font-size:0.8rem;">' + new Date(d.created_at).toLocaleString() + '</div></div>';
-    }).join('');
-}
-
-async function loadMyCollects() {
-    var supabase = getSupabase();
-    var { data, error } = await supabase.from('collects').select('dyn_id').eq('user_email', currentUser.email).eq('class_id', currentClassId);
-    if (error) { console.error(error); return; }
-    var wrap = document.getElementById('myCollectList');
-    if (!wrap) return;
-    if (!data || data.length === 0) {
-        wrap.innerHTML = '<div style="color:var(--text-secondary);padding:20px;">还没有收藏</div>';
-        return;
-    }
-    var dynIds = data.map(function(l) { return l.dyn_id; });
-    var { data: dyns } = await supabase.from('dynamics').select('*').in('id', dynIds).order('created_at', { ascending: false });
-    if (!dyns) return;
-    wrap.innerHTML = dyns.map(function(d) {
-        return '<div class="dynamic-item"><div class="user-head"><div><div class="nickname">' + d.nickname + '</div></div></div><div class="dynamic-text">' + (d.text || '') + '</div><div style="color:var(--text-secondary);font-size:0.8rem;">' + new Date(d.created_at).toLocaleString() + '</div></div>';
-    }).join('');
-}
-
 // ---------- 模态框事件绑定 ----------
 function bindModalEvents() {
     var el;
@@ -3296,6 +3344,32 @@ function bindModalEvents() {
             }
         };
     }
+}
+
+function bindGroupManageButtons() {
+    var el;
+    el = document.getElementById('groupManageClose');
+    if (el) el.onclick = function() { document.getElementById('groupManageModal').style.display = 'none'; };
+    el = document.getElementById('groupAddMemberBtn');
+    if (el) el.onclick = addGroupMember;
+    el = document.getElementById('groupAddMemberCancel');
+    if (el) el.onclick = function() { document.getElementById('groupAddMemberModal').style.display = 'none'; };
+    el = document.getElementById('groupAddMemberConfirm');
+    if (el) el.onclick = confirmAddGroupMember;
+    el = document.getElementById('groupEditNameBtn');
+    if (el) el.onclick = editGroupName;
+    el = document.getElementById('groupEditNameCancel');
+    if (el) el.onclick = function() { document.getElementById('groupEditNameModal').style.display = 'none'; };
+    el = document.getElementById('groupEditNameConfirm');
+    if (el) el.onclick = confirmEditGroupName;
+    el = document.getElementById('groupSetAnnounceBtn');
+    if (el) el.onclick = setGroupAnnounce;
+    el = document.getElementById('groupAnnounceCancel');
+    if (el) el.onclick = function() { document.getElementById('groupAnnounceModal').style.display = 'none'; };
+    el = document.getElementById('groupAnnounceConfirm');
+    if (el) el.onclick = confirmGroupAnnounce;
+    el = document.getElementById('groupDissolveBtn');
+    if (el) el.onclick = function() { if (currentManageGroupId) dissolveGroup(currentManageGroupId); };
 }
 
 // ---------- 签到 ----------
@@ -3456,9 +3530,35 @@ function requestNotificationPermission() {
     }
 }
 
-// ================================================================
-//  页面初始化
-// ================================================================
+// ---------- 头像框/挂件 ----------
+async function loadEquippedItems() {
+    var supabase = getSupabase();
+    var { data: userItems, error: userError } = await supabase
+        .from('user_avatar_items')
+        .select('item_id, is_equipped')
+        .eq('user_email', currentUser.email)
+        .eq('is_equipped', true);
+    if (userError) { console.error('loadEquippedItems 查询失败:', userError); return; }
+    var container = document.getElementById('userEquippedItems');
+    if (!container) return;
+    if (!userItems || userItems.length === 0) {
+        container.innerHTML = '<span style="color:var(--text-secondary);font-size:0.85rem;">未装备任何装饰</span>';
+        return;
+    }
+    var itemIds = userItems.map(function(item) { return item.item_id; });
+    var { data: avatarItems, error: avatarError } = await supabase.from('avatar_items').select('*').in('id', itemIds);
+    if (avatarError) { console.error('加载头像物品详情失败:', avatarError); return; }
+    if (!avatarItems || avatarItems.length === 0) {
+        container.innerHTML = '<span style="color:var(--text-secondary);font-size:0.85rem;">未装备任何装饰</span>';
+        return;
+    }
+    container.innerHTML = avatarItems.map(function(item) {
+        var icon = item.type === 'frame' ? '🖼️' : '🎀';
+        return '<span style="background:var(--bg-card);padding:4px 12px;border-radius:var(--radius-full);font-size:0.8rem;border:1px solid var(--border-subtle);">' + icon + ' ' + item.name + '</span>';
+    }).join('');
+}
+
+// ---------- 页面初始化 ----------
 window.onload = function() {
     initGlobalEmojiPanel();
 
@@ -3503,7 +3603,8 @@ window.onload = function() {
     el = document.getElementById('findBtn');
     if (el) el.onclick = function() { toast('请使用Supabase的忘记密码功能'); };
 
-    // 粒子生成
+    // 粒子生成（在 auth-wrap 内部，由 CSS 控制）
+    // 注意：粒子已在 HTML 中放置，JS 只需要生成粒子元素
     (function() {
         var container = document.getElementById('particles');
         if (!container) return;
