@@ -20,17 +20,17 @@
 </head>
 <body>
 
-    <!-- ===== 全局背景 ===== -->
+    <!-- ===== 全局背景光晕 ===== -->
     <div class="bg-glow" id="bgGlow"></div>
 
     <!-- ===== Toast ===== -->
     <div class="toast" id="toast"></div>
 
     <!-- ================================================================
-         认证页
+         认证页（粒子在内部）
          ================================================================ -->
     <div class="auth-wrap" id="authWrap">
-            <div id="particles"></div>
+        <div id="particles"></div>  <!-- 粒子放在这里 -->
         <div class="auth-card">
             <div class="auth-logo">
                 <svg viewBox="0 0 200 200" width="48" height="48"><use href="#logo-svg"></use></svg>
@@ -116,14 +116,14 @@
                 </div>
             </div>
 
-            <!-- 个人中心（独立视图） -->
+            <!-- 个人中心 -->
             <div class="view" id="view-profile">
                 <div class="view-content">
                     <div id="profileContent"></div>
                 </div>
             </div>
 
-            <!-- 设置（独立视图） -->
+            <!-- 设置 -->
             <div class="view" id="view-settings">
                 <div class="view-content">
                     <div id="settingsContent"></div>
@@ -170,7 +170,7 @@
     </div>
 
     <!-- ================================================================
-         模态框（所有弹窗）
+         模态框
          ================================================================ -->
     <!-- 创建班级 -->
     <div class="modal-mask" id="createClassModal">
@@ -185,7 +185,7 @@
         </div>
     </div>
 
-    <!-- 加入班级（含搜索框） -->
+    <!-- 加入班级 -->
     <div class="modal-mask" id="joinClassModal">
         <div class="modal">
             <h3>🔍 加入班级</h3>
