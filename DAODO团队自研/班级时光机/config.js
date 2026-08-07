@@ -1,18 +1,19 @@
 // ================================================================
-//  📦 配置文件 config.js
-//  包含：Supabase密钥、常量、等级配置、敏感词、地区树
+//  config.js - 班级时光机配置
+//  与官网共用 Supabase
 // ================================================================
 
-// ---------- Supabase 配置 ----------
 var CONFIG = {
     SUPABASE_URL: 'https://agpznniqfxdeudwvimbb.supabase.co',
     SUPABASE_ANON_KEY: 'sb_publishable_0TcgungxkhJpKIJf2bHdLA_X14JILIp'
 };
 
-// ---------- 敏感词过滤 ----------
+var OWNER_EMAIL = 'zhanzhu@guanli.com';
+var OWNER_NICKNAME = '站主';
+var OWNER_PASSWORD = 'Fang7!Kai9@';
+
 var SENSITIVE_WORDS = ['傻逼','SB','sb','fuck','Fuck','操','cao','妈的','尼玛','脑残','白痴','垃圾','废物','死全家','狗日','妈逼','贱人','婊子','畜生'];
 
-// ---------- 等级配置 ----------
 var LEVEL_CONFIG = [
     { level: 0, exp: 0, color: '#b0a098', title: '🌱 班级萌芽' },
     { level: 1, exp: 0, color: '#b0a098', title: '🌱 班级萌芽' },
@@ -27,7 +28,6 @@ var LEVEL_CONFIG = [
     { level: 10, exp: 10000, color: 'linear-gradient(135deg,#4589C4,#7E3ACB)', title: '🎖️ 超凡之上' }
 ];
 
-// ---------- 地区树 ----------
 var AREA_TREE = [
     {
         name: "银河系", children: [
@@ -52,5 +52,4 @@ var AREA_TREE = [
     }
 ];
 
-// ---------- 当前版本 ----------
-var currentVersion = 'v3.1.0';
+var currentVersion = 'v3.2.0';
